@@ -13,11 +13,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinancialManagementSystem.I
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinancialManagementSystem.Core.Tests", "FinancialManagementSystem.Core.Tests\FinancialManagementSystem.Core.Tests.csproj", "{D4991FF8-A6A2-4C44-99BD-4603ECB3C93C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinancialManagementSystem.Core", "FinancialManagementSystem.Core\FinancialManagementSystem.Core.csproj", "{4D2834B2-2F43-4001-B448-BA350A2D4E67}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FinancialManagementSystem.Core", "FinancialManagementSystem.Core\FinancialManagementSystem.Core.csproj", "{4D2834B2-2F43-4001-B448-BA350A2D4E67}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinancialManagementSystem.Infrastructure", "FinancialManagementSystem.Infrastructure\FinancialManagementSystem.Infrastructure.csproj", "{7E7D63AC-9F62-4DFA-B178-7D019C713023}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FinancialManagementSystem.Infrastructure", "FinancialManagementSystem.Infrastructure\FinancialManagementSystem.Infrastructure.csproj", "{7E7D63AC-9F62-4DFA-B178-7D019C713023}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinancialManagementSystem.API", "FinancialManagementSystem.API\FinancialManagementSystem.API.csproj", "{7003431E-C8D9-478C-86B5-FD92038CB58C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FinancialManagementSystem.API", "FinancialManagementSystem.API\FinancialManagementSystem.API.csproj", "{7003431E-C8D9-478C-86B5-FD92038CB58C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{34AA47FB-C541-44E1-8F8A-2EC03F99505F}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
