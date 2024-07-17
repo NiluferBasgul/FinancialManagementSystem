@@ -2,12 +2,17 @@
 
 namespace FinancialManagementSystem.Core.Models
 {
-    public class LoginModel
+    public class UserUpdateModel
     {
+        public int Id { get; set; }
+
         [Required]
+        [StringLength(50, MinimumLength = 3)]
         public string Username { get; set; }
 
         [Required]
-        public string Password { get; set; }
+        [EmailAddress]
+        public string Email { get; set; }
     }
+
 }

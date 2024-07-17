@@ -7,6 +7,9 @@ using System.Security.Claims;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
+using FinancialManagementSystem.Core.Models;
+using AuthResult = FinancialManagementSystem.Core.Models.AuthResult;
+using BCrypt.Net;
 
 namespace FinancialManagementSystem.Core.Services
 {
@@ -21,78 +24,85 @@ namespace FinancialManagementSystem.Core.Services
             _configuration = configuration;
         }
 
-        public async Task<AuthResult> LoginAsync(string username, string password)
+        public async Task<AuthResult> LoginAsync(LoginModel model)
         {
-            var user = await _userRepository.GetByUsernameAsync(username);
-            if (user == null || !VerifyPasswordHash(password, user.PasswordHash))
+            var user = await _userRepository.GetByUsernameAsync(model.Username);
+            if (user == null || !BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
             {
-                return new AuthResult { Succeeded = false, Errors = new[] { "Invalid username or password" } };
+                return new AuthResult { Succeeded = false, ErrorMessage = "Invalid username or password" };
             }
 
             var token = GenerateJwtToken(user);
             return new AuthResult { Succeeded = true, Token = token };
         }
 
-        public async Task<AuthResult> RegisterAsync(string username, string email, string password)
+        public async Task<AuthResult> RegisterAsync(RegisterModel model)
         {
-            if (await _userRepository.GetByUsernameAsync(username) != null)
+            if (await _userRepository.GetByUsernameAsync(model.Username) != null)
             {
-                return new AuthResult { Succeeded = false, Errors = new[] { "Username already exists" } };
+                return new AuthResult { Succeeded = false, ErrorMessage = "Username already exists" };
             }
 
-            if (await _userRepository.GetByEmailAsync(email) != null)
+            if (await _userRepository.GetByEmailAsync(model.Email) != null)
             {
-                return new AuthResult { Succeeded = false, Errors = new[] { "Email already exists" } };
+                return new AuthResult { Succeeded = false, ErrorMessage = "Email already exists" };
             }
 
-            var passwordHash = CreatePasswordHash(password);
             var user = new User
             {
-                Username = username,
-                Email = email,
-                PasswordHash = passwordHash,
-                Role = "User",
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                Username = model.Username,
+                Email = model.Email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password)
+
             };
 
             await _userRepository.AddAsync(user);
-            return new AuthResult { Succeeded = true };
+
+            var token = GenerateJwtToken(user);
+            return new AuthResult { Succeeded = true, Token = token };
         }
 
-        private bool VerifyPasswordHash(string password, string storedHash)
+        public int? ValidateToken(string token)
         {
-            // Implement password verification logic
-            return BCrypt.Net.BCrypt.Verify(password, storedHash);
-        }
+            if (string.IsNullOrEmpty(token))
+                return null;
 
-        private string CreatePasswordHash(string password)
-        {
-            // Implement password hashing logic
-            return BCrypt.Net.BCrypt.HashPassword(password);
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Secret"]);
+            try
+            {
+                tokenHandler.ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ClockSkew = TimeSpan.Zero
+                }, out SecurityToken validatedToken);
+
+                var jwtToken = (JwtSecurityToken)validatedToken;
+                var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
+
+                return userId;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private string GenerateJwtToken(User user)
         {
-            var claims = new[]
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Secret"]);
+            var tokenDescriptor = new SecurityTokenDescriptor
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role)
+                Subject = new ClaimsIdentity(new[] { new Claim("id", user.Id.ToString()) }),
+                Expires = DateTime.UtcNow.AddDays(7),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.Now.AddMinutes(30),
-                signingCredentials: creds);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
         }
     }
 }

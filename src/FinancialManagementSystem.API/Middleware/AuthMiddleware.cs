@@ -1,4 +1,6 @@
-﻿namespace FinancialManagementSystem.API.Middleware
+﻿using FinancialManagementSystem.Core.Interfaces;
+
+namespace FinancialManagementSystem.API.Middleware
 {
     public class AuthMiddleware
     {

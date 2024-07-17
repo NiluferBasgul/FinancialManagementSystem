@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using FinancialManagementSystem.Core.Interfaces;
-using FinancialManagementSystem.API.Models;
 using System.Threading.Tasks;
 using FinancialManagementSystem.Core.Models;
 
@@ -18,25 +17,25 @@ namespace FinancialManagementSystem.API.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginModel model)
+        public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
-            var result = await _authService.LoginAsync(model.Username, model.Password);
+            var result = await _authService.LoginAsync(model);
             if (result.Succeeded)
             {
                 return Ok(new { Token = result.Token });
             }
-            return Unauthorized();
+            return Unauthorized(result.ErrorMessage);
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterModel model)
+        public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
-            var result = await _authService.RegisterAsync(model.Username, model.Email, model.Password);
+            var result = await _authService.RegisterAsync(model);
             if (result.Succeeded)
             {
-                return Ok(new { Message = "User registered successfully" });
+                return Ok(new { Token = result.Token });
             }
-            return BadRequest(result.Errors);
+            return BadRequest(result.ErrorMessage);
         }
     }
 }

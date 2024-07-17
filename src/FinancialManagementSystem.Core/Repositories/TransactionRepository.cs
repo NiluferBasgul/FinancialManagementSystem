@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FinancialManagementSystem.Core.Entities;
 using FinancialManagementSystem.Core.Interfaces;
+using FinancialManagementSystem.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinancialManagementSystem.Infrastructure.Repositories
@@ -16,7 +17,7 @@ namespace FinancialManagementSystem.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Transaction>> GetTransactionsByUserIdAsync(int userId)
+        public async Task<IEnumerable<Transaction>> GetTransactionsByUserIdAsync(Guid userId)
         {
             return await _context.Transactions
                 .Where(t => t.UserId == userId)

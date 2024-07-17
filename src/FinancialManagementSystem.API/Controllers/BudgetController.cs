@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using FinancialManagementSystem.Core.Interfaces;
-using FinancialManagementSystem.API.Models;
 using System.Threading.Tasks;
 using System.Security.Claims;
+using FinancialManagementSystem.Core.Models;
 
 namespace FinancialManagementSystem.API.Controllers
 {
@@ -18,11 +18,15 @@ namespace FinancialManagementSystem.API.Controllers
         {
             _budgetService = budgetService;
         }
-
         [HttpGet]
         public async Task<IActionResult> GetBudgets()
         {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized();
+            }
+            var userId = int.Parse(userIdClaim.Value);
             var budgets = await _budgetService.GetBudgetsAsync(userId);
             return Ok(budgets);
         }
@@ -30,7 +34,12 @@ namespace FinancialManagementSystem.API.Controllers
         [HttpPost]
         public async Task<IActionResult> AddBudget(BudgetModel model)
         {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized();
+            }
+            var userId = int.Parse(userIdClaim.Value);
             var result = await _budgetService.AddBudgetAsync(userId, model);
             if (result.Succeeded)
             {
@@ -38,7 +47,5 @@ namespace FinancialManagementSystem.API.Controllers
             }
             return BadRequest(result.Errors);
         }
-
-        // Implement UpdateBudget and DeleteBudget methods similar to the TransactionController
     }
 }
