@@ -17,7 +17,7 @@ namespace FinancialManagementSystem.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Transaction>> GetTransactionsByUserIdAsync(Guid userId)
+        public async Task<IEnumerable<Transaction>> GetTransactionsByUserIdAsync(int userId)
         {
             return await _context.Transactions
                 .Where(t => t.UserId == userId)
