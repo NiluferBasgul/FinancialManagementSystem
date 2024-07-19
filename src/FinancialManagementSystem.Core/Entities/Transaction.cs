@@ -15,6 +15,7 @@ namespace FinancialManagementSystem.Core.Entities
         public DateTime UpdatedAt { get; set; }
 
         public User User { get; set; }
+
     }
 
     public enum TransactionType

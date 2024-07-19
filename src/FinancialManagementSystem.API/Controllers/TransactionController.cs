@@ -1,4 +1,5 @@
 ﻿using FinancialManagementSystem.Core.Interfaces;
+using FinancialManagementSystem.Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;

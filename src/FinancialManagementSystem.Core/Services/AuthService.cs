@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using FinancialManagementSystem.Core.Models;
 using AuthResult = FinancialManagementSystem.Core.Models.AuthResult;
 using BCrypt.Net;
+using Microsoft.Extensions.Logging;
 
 namespace FinancialManagementSystem.Core.Services
 {
@@ -17,49 +18,71 @@ namespace FinancialManagementSystem.Core.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly IConfiguration _configuration;
+        private readonly ILogger<AuthService> _logger;
 
-        public AuthService(IUserRepository userRepository, IConfiguration configuration)
+        public AuthService(IUserRepository userRepository, IConfiguration configuration, ILogger<AuthService> logger)
         {
             _userRepository = userRepository;
             _configuration = configuration;
+            _logger = logger;
         }
 
         public async Task<AuthResult> LoginAsync(LoginModel model)
         {
-            var user = await _userRepository.GetByUsernameAsync(model.Username);
-            if (user == null || !BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
+            try
             {
-                return new AuthResult { Succeeded = false, ErrorMessage = "Invalid username or password" };
-            }
+                var user = await _userRepository.GetByUsernameAsync(model.Username);
+                if (user == null || !BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
+                {
+                    _logger.LogWarning($"Failed login attempt for username: {model.Username}");
+                    return new AuthResult { Succeeded = false, ErrorMessage = "Invalid username or password" };
+                }
 
-            var token = GenerateJwtToken(user);
-            return new AuthResult { Succeeded = true, Token = token };
+                var token = GenerateJwtToken(user);
+                _logger.LogInformation($"User logged in: {user.Username}");
+                return new AuthResult { Succeeded = true, Token = token };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error during login for username: {model.Username}");
+                throw;
+            }
         }
 
         public async Task<AuthResult> RegisterAsync(RegisterModel model)
         {
-            if (await _userRepository.GetByUsernameAsync(model.Username) != null)
+            try
             {
-                return new AuthResult { Succeeded = false, ErrorMessage = "Username already exists" };
+                if (await _userRepository.GetByUsernameAsync(model.Username) != null)
+                {
+                    _logger.LogWarning($"Registration attempt with existing username: {model.Username}");
+                    return new AuthResult { Succeeded = false, ErrorMessage = "Username already exists" };
+                }
+
+                if (await _userRepository.GetByEmailAsync(model.Email) != null)
+                {
+                    _logger.LogWarning($"Registration attempt with existing email: {model.Email}");
+                    return new AuthResult { Succeeded = false, ErrorMessage = "Email already exists" };
+                }
+
+                var user = new User
+                {
+                    Username = model.Username,
+                    Email = model.Email,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password)
+                };
+
+                await _userRepository.AddAsync(user);
+
+                var token = GenerateJwtToken(user);
+                _logger.LogInformation($"New user registered: {user.Username}");
+                return new AuthResult { Succeeded = true, Token = token };
             }
-
-            if (await _userRepository.GetByEmailAsync(model.Email) != null)
+            catch (Exception ex)
             {
-                return new AuthResult { Succeeded = false, ErrorMessage = "Email already exists" };
+                _logger.LogError(ex, $"Error during registration for username: {model.Username}");
+                throw;
             }
-
-            var user = new User
-            {
-                Username = model.Username,
-                Email = model.Email,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password)
-
-            };
-
-            await _userRepository.AddAsync(user);
-
-            var token = GenerateJwtToken(user);
-            return new AuthResult { Succeeded = true, Token = token };
         }
 
         public int? ValidateToken(string token)
@@ -83,6 +106,7 @@ namespace FinancialManagementSystem.Core.Services
                 var jwtToken = (JwtSecurityToken)validatedToken;
                 var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
 
+                _logger.LogInformation($"Token validated for user ID: {userId}");
                 return userId;
             }
             catch

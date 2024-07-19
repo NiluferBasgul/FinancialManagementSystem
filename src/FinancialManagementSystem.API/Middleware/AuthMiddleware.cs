@@ -1,41 +1,47 @@
 ﻿using FinancialManagementSystem.Core.Interfaces;
+using System.Security.Claims;
 
-namespace FinancialManagementSystem.API.Middleware
+public class AuthMiddleware
 {
-    public class AuthMiddleware
+    private readonly RequestDelegate _next;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger<AuthMiddleware> _logger;
+
+    public AuthMiddleware(RequestDelegate next, IServiceProvider serviceProvider, ILogger<AuthMiddleware> logger)
     {
-        private readonly RequestDelegate _next;
-        private readonly IAuthService _authService;
-
-        public AuthMiddleware(RequestDelegate next, IAuthService authService)
-        {
-            _next = next;
-            _authService = authService;
-        }
-
-        public async Task InvokeAsync(HttpContext context)
-        {
-            var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-
-            if (token != null)
-            {
-                var userId = _authService.ValidateToken(token);
-                if (userId != null)
-                {
-                    context.Items["UserId"] = userId;
-                }
-            }
-
-            await _next(context);
-        }
+        _next = next;
+        _serviceProvider = serviceProvider;
+        _logger = logger;
     }
 
-    // Extension method used to add the middleware to the HTTP request pipeline.
-    public static class AuthMiddlewareExtensions
+    public async Task InvokeAsync(HttpContext context)
     {
-        public static IApplicationBuilder UseAuthMiddleware(this IApplicationBuilder builder)
+        using (var scope = _serviceProvider.CreateScope())
         {
-            return builder.UseMiddleware<AuthMiddleware>();
+            var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
+
+            var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            if (token != null)
+            {
+                var userId = authService.ValidateToken(token);
+                if (userId != null)
+                {
+                    _logger.LogInformation($"User authenticated: {userId}");
+                    var claims = new[]
+                    {
+                        new Claim(ClaimTypes.NameIdentifier, userId.Value.ToString()),
+                        new Claim(ClaimTypes.Name, userId.Value.ToString())
+                    };
+                    var identity = new ClaimsIdentity(claims, "Token");
+                    context.User = new ClaimsPrincipal(identity);
+                }
+                else
+                {
+                    _logger.LogWarning("Invalid token provided");
+                }
+            }
         }
+
+        await _next(context);
     }
 }

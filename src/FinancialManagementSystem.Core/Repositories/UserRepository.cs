@@ -2,16 +2,19 @@
 using FinancialManagementSystem.Core.Interfaces;
 using FinancialManagementSystem.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace FinancialManagementSystem.Core.Repositories
 {
     public class UserRepository : IUserRepository
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<UserRepository> _logger;
 
-        public UserRepository(ApplicationDbContext context)
+        public UserRepository(ApplicationDbContext context, ILogger<UserRepository> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async Task<User> GetByIdAsync(int id)
@@ -24,10 +27,24 @@ namespace FinancialManagementSystem.Core.Repositories
             return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
         }
 
+        public async Task<User> GetByEmailAsync(string email)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
+
+        public async Task<User> AddAsync(User user)
+        {
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+            _logger.LogInformation($"User added: {user.Username}");
+            return user;
+        }
+
         public async Task<User> UpdateAsync(User user)
         {
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
+            _logger.LogInformation($"User updated: {user.Username}");
             return user;
         }
 
@@ -38,17 +55,12 @@ namespace FinancialManagementSystem.Core.Repositories
             {
                 _context.Users.Remove(user);
                 await _context.SaveChangesAsync();
+                _logger.LogInformation($"User deleted: {user.Username}");
             }
         }
-
-        public Task<User> AddAsync(User user)
+        public async Task<IEnumerable<User>> GetAllAsync()
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<User> GetByEmailAsync(string email)
-        {
-            throw new NotImplementedException();
+            return await _context.Users.ToListAsync();
         }
     }
 }
