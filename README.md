@@ -1,3 +1,50 @@
+FinancialManagementSystem/
+├── src/
+│   ├── FinancialManagementSystem.API/
+│   │   ├── Controllers/
+│   │   │   ├── AuthController.cs
+│   │   │   ├── UserController.cs
+│   │   │   ├── TransactionController.cs
+│   │   │   ├── BudgetController.cs
+│   │   │   └── IncomeController.cs
+│   │   ├── Middleware/
+│   │   │   └── AuthMiddleware.cs
+│   │   ├── Program.cs
+│   │   └── Startup.cs
+│   ├── FinancialManagementSystem.Core/
+│   │   ├── Entities/
+│   │   │   ├── User.cs
+│   │   │   ├── Transaction.cs
+│   │   │   ├── Budget.cs
+│   │   │   └── Income.cs
+│   │   ├── Interfaces/
+│   │   │   ├── IAuthService.cs
+│   │   │   ├── IUserService.cs
+│   │   │   ├── ITransactionService.cs
+│   │   │   └── IBudgetService.cs
+│   │   ├── Services/
+│   │   │   ├── AuthService.cs
+│   │   │   ├── UserService.cs
+│   │   │   ├── TransactionService.cs
+│   │   │   └── BudgetService.cs
+│   │   └── Models/
+│   │       ├── LoginModel.cs
+│   │       ├── RegisterModel.cs
+│   │       └── TransactionModel.cs
+│   ├── FinancialManagementSystem.Infrastructure/
+│   │   ├── Data/
+│   │   │   └── ApplicationDbContext.cs
+│   │   ├── Repositories/
+│   │   │   ├── UserRepository.cs
+│   │   │   ├── TransactionRepository.cs
+│   │   │   └── BudgetRepository.cs
+│   │   └── Migrations/
+├── tests/
+│   ├── FinancialManagementSystem.UnitTests/
+│   └── FinancialManagementSystem.IntegrationTests/
+└── FinancialManagementSystem.sln
+
+
 README for Financial Management API
 This project contains the source code for the Financial Management API. The API is built using C# and the .NET framework.
 
