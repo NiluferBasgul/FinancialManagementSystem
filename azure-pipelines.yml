@@ -1,0 +1,79 @@
+# azure-pipelines.yml
+trigger:
+  branches:
+    include:
+    - main   # or your default branch name
+
+pool:
+  vmImage: 'ubuntu-latest'  # Use Ubuntu to build your application
+
+variables:
+  buildConfiguration: 'Release'
+
+steps:
+- task: UseDotNet@2   # Install .NET SDK
+  inputs:
+    packageType: 'sdk'
+    version: '6.x.x'  # Ensure this matches your .NET Core SDK version
+
+- script: dotnet restore   # Restore project dependencies
+  displayName: 'Restore NuGet Packages'
+
+- script: dotnet build --configuration $(buildConfiguration)   # Build the project
+  displayName: 'Build Project'
+
+- script: dotnet test --configuration $(buildConfiguration)   # Run tests
+  displayName: 'Run Unit Tests'
+
+  # OWASP Dependency Check
+- task: Bash@3
+  inputs:
+    targetType: 'inline'
+    script: |
+      # Install OWASP Dependency Check
+      curl -L https://github.com/jeremylong/DependencyCheck/releases/download/v6.5.3/dependency-check-6.5.3-release.zip -o dependency-check.zip
+      unzip dependency-check.zip -d dependency-check
+      chmod +x dependency-check/bin/dependency-check.sh
+
+      # Run OWASP Dependency Check scan
+      ./dependency-check/bin/dependency-check.sh --project FinancialManagementSystem --scan ./ --format "ALL" --out "./dependency-check-report"
+  displayName: 'Run OWASP Dependency Check'
+
+# Publish Test Results to Azure DevOps
+- task: PublishTestResults@2
+  inputs:
+    testResultsFiles: '**/TEST-*.xml'
+    mergeTestResults: true
+
+# Archive the Dependency Check report
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: './dependency-check-report'
+    ArtifactName: 'DependencyCheckReport'
+    publishLocation: 'Container'
+
+- task: PublishTestResults@2
+  inputs:
+    testResultsFiles: '**/TEST-*.xml'
+    mergeTestResults: true
+
+- task: ArchiveFiles@2    # Archive the build output (optional)
+  inputs:
+    rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/drop.zip'
+    replaceExistingArchive: true
+
+- task: PublishBuildArtifacts@1    # Publish build artifacts
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+
+# Deploy to Azure App Service
+- task: AzureWebApp@1
+  inputs:
+    azureSubscription: '2114b00a-c5f1-4ed5-a11c-48b9888d5672'
+    appName: 'financial-management-api'
+    package: '$(Build.ArtifactStagingDirectory)/drop.zip'

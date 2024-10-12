@@ -40,7 +40,8 @@ namespace FinancialManagementSystem.Tests.Controllers
             // Arrange
             var userId = 1;
             var transactions = new List<Transaction> { new Transaction { Id = 1, UserId = userId } };
-            _mockTransactionService.Setup(s => s.GetTransactionsAsync(userId)).ReturnsAsync(transactions);
+            _mockTransactionService.Setup(s => s.GetTransactionsAsync(userId, 0, 10))
+                .ReturnsAsync(transactions);
 
             // Act
             var result = await _controller.GetTransactions();
@@ -56,7 +57,7 @@ namespace FinancialManagementSystem.Tests.Controllers
         {
             // Arrange
             var userId = 1;
-            var model = new TransactionModel { Amount = 100, Description = "Test", Date = DateTime.Now, Category = "Test", Type = TransactionType.Expense };
+            var model = new TransactionModel { Amount = 100, Description = "Test", Date = DateTime.Now, Category = "Test", Type = "Expense" };
             _mockTransactionService.Setup(s => s.AddTransactionAsync(userId, model))
                 .ReturnsAsync(new TransactionResult { Succeeded = true, TransactionId = 1 });
 
@@ -77,7 +78,7 @@ namespace FinancialManagementSystem.Tests.Controllers
             // Arrange
             var userId = 1;
             var transactionId = 1;
-            var model = new TransactionModel { Amount = 100, Description = "Updated", Date = DateTime.Now, Category = "Test", Type = TransactionType.Expense };
+            var model = new TransactionModel { Amount = 100, Description = "Updated", Date = DateTime.Now, Category = "Test", Type = "Expense" };
             _mockTransactionService.Setup(s => s.UpdateTransactionAsync(userId, transactionId, model))
                 .ReturnsAsync(new TransactionResult { Succeeded = true });
 

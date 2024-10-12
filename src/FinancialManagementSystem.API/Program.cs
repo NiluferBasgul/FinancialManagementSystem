@@ -1,26 +1,24 @@
+using FinancialManagementSystem.API.Middleware;
+using FinancialManagementSystem.Core.Data;
 using FinancialManagementSystem.Core.Interfaces;
+using FinancialManagementSystem.Core.Interfaces.FinancialManagementSystem.Core.Services;
+using FinancialManagementSystem.Core.Repositories;
 using FinancialManagementSystem.Core.Services;
-using FinancialManagementSystem.Infrastructure.Data;
 using FinancialManagementSystem.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Reflection;
 using System.Text;
-using Microsoft.Extensions.Caching.StackExchangeRedis;
-using FinancialManagementSystem.Core.Interfaces.FinancialManagementSystem.Core.Services;
-using FinancialManagementSystem.Core.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllers();
 
-// Configure DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection")));
 
-// Configure Redis
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration.GetConnectionString("Redis");
@@ -36,13 +34,20 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<IBudgetRepository, BudgetRepository>();
 builder.Services.AddScoped<IGoalRepository, GoalRepository>();
+builder.Services.AddScoped<IIncomeService, IncomeService>();
+builder.Services.AddScoped<IIncomeRepository, IncomeRepository>();
+builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<ICacheService, CacheService>();
+builder.Services.AddScoped<INeedsRepository, NeedsRepository>();
 builder.Services.AddScoped<IUserService>(provider =>
     new UserService(
         provider.GetRequiredService<IUserRepository>(),
         provider.GetRequiredService<ILogger<UserService>>()
     )
 );
+
 // Configure JWT authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -52,22 +57,38 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Secret"])),
             ValidateIssuer = false,
-            ValidateAudience = false
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
         };
     });
 
-// Configure Swagger/OpenAPI
+
+// Configure CORS to allow frontend access
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder =>
+        {
+            builder
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+        });
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Financial Management System API", Version = "v1" });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
+        Description = "JWT Authorization header. Just enter your token, no need to add 'Bearer'.",
         Name = "Authorization",
         In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT"
     });
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
@@ -80,25 +101,27 @@ builder.Services.AddSwaggerGen(c =>
                     Id = "Bearer"
                 }
             },
-            new string[] { }
+            Array.Empty<string>()
         }
     });
+
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
 });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseCors("AllowAll");
+app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 app.MapControllers();
 
 app.Run();

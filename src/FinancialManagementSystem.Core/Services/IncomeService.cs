@@ -53,6 +53,8 @@ namespace FinancialManagementSystem.Core.Services
             try
             {
                 var income = MapToIncome(model);
+                // Remove the Id assignment if it's present
+                income.Id = 0; // This ensures that the database will auto-generate the Id
                 var result = await _incomeRepository.AddAsync(income);
                 _logger.LogInformation($"Income added for user {model.UserId}: {model.Amount:C2}");
                 return MapToIncomeModel(result);
@@ -145,7 +147,6 @@ namespace FinancialManagementSystem.Core.Services
         {
             return new Income
             {
-                Id = model.Id,
                 UserId = model.UserId,
                 Amount = model.Amount,
                 Date = model.Date,

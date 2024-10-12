@@ -1,9 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using FinancialManagementSystem.Core.Data;
 using FinancialManagementSystem.Core.Entities;
 using FinancialManagementSystem.Core.Interfaces;
-using FinancialManagementSystem.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinancialManagementSystem.Infrastructure.Repositories
@@ -17,11 +14,13 @@ namespace FinancialManagementSystem.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Transaction>> GetTransactionsByUserIdAsync(int userId)
+        public async Task<IEnumerable<Transaction>> GetTransactionsByUserIdAsync(int userId, int skip, int take)
         {
             return await _context.Transactions
-                .Where(t => t.UserId == userId)
+                .Where(t => t.UserId == userId && !t.IsDeleted)
                 .OrderByDescending(t => t.Date)
+                .Skip(skip)
+                .Take(take)
                 .ToListAsync();
         }
 

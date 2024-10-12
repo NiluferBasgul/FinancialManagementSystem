@@ -1,5 +1,5 @@
-﻿using FinancialManagementSystem.Core.Entities;
-using FinancialManagementSystem.Infrastructure.Data;
+﻿using FinancialManagementSystem.Core.Data;
+using FinancialManagementSystem.Core.Entities;
 using FinancialManagementSystem.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
@@ -24,9 +24,9 @@ namespace FinancialManagementSystem.Tests.Repositories
             using (var context = new ApplicationDbContext(options))
             {
                 context.Transactions.AddRange(
-                    new Transaction { Id = 1, UserId = userId, Amount = 100, Description = "Test 1" },
-                    new Transaction { Id = 2, UserId = userId, Amount = 200, Description = "Test 2" },
-                    new Transaction { Id = 3, UserId = 2, Amount = 300, Description = "Other user" }
+                    new Transaction { Id = 1, UserId = userId, Amount = 100, Description = "Test 1", Date = DateTime.Now.AddDays(-1), Category ="Test", Type= "Test" },
+                    new Transaction { Id = 2, UserId = userId, Amount = 200, Description = "Test 2", Date = DateTime.Now, Category = "Test", Type = "Test" },
+                    new Transaction { Id = 3, UserId = 2, Amount = 300, Description = "Other user", Date = DateTime.Now , Category = "Test", Type = "Get" }
                 );
                 await context.SaveChangesAsync();
             }
@@ -35,11 +35,12 @@ namespace FinancialManagementSystem.Tests.Repositories
             using (var context = new ApplicationDbContext(options))
             {
                 var repository = new TransactionRepository(context);
-                var result = await repository.GetTransactionsByUserIdAsync(userId);
+                var result = await repository.GetTransactionsByUserIdAsync(userId, 0, 10);
 
                 // Assert
                 Assert.Equal(2, result.Count());
                 Assert.All(result, t => Assert.Equal(userId, t.UserId));
+                Assert.True(result.First().Date > result.Last().Date);
             }
         }
 
@@ -51,7 +52,7 @@ namespace FinancialManagementSystem.Tests.Repositories
             var transactionId = 1;
             using (var context = new ApplicationDbContext(options))
             {
-                context.Transactions.Add(new Transaction { Id = transactionId, UserId = 1, Amount = 100, Description = "Test" });
+                context.Transactions.Add(new Transaction { Id = transactionId, UserId = 1, Amount = 100, Description = "Test", Category = "Test", Type = "Delete" });
                 await context.SaveChangesAsync();
             }
 
@@ -68,6 +69,24 @@ namespace FinancialManagementSystem.Tests.Repositories
         }
 
         [Fact]
+        public async Task GetByIdAsync_NonExistingTransaction_ReturnsNull()
+        {
+            // Arrange
+            var options = GetInMemoryDbContextOptions();
+            var transactionId = 999;
+
+            // Act
+            using (var context = new ApplicationDbContext(options))
+            {
+                var repository = new TransactionRepository(context);
+                var result = await repository.GetByIdAsync(transactionId);
+
+                // Assert
+                Assert.Null(result);
+            }
+        }
+
+        [Fact]
         public async Task AddAsync_NewTransaction_AddsTransactionToDatabase()
         {
             // Arrange
@@ -78,8 +97,8 @@ namespace FinancialManagementSystem.Tests.Repositories
                 Amount = 150,
                 Description = "New Transaction",
                 Date = DateTime.Now,
-                Category = "Test Category", // Add this line
-                Type = TransactionType.Expense // Add this line if it's a required field
+                Category = "Test Category",
+                Type = "Expense"
             };
 
             // Act
@@ -98,6 +117,7 @@ namespace FinancialManagementSystem.Tests.Repositories
                 Assert.Equal("Test Category", addedTransaction.Category);
             }
         }
+
         [Fact]
         public async Task UpdateAsync_ExistingTransaction_UpdatesTransactionInDatabase()
         {
@@ -106,7 +126,7 @@ namespace FinancialManagementSystem.Tests.Repositories
             var transactionId = 1;
             using (var context = new ApplicationDbContext(options))
             {
-                context.Transactions.Add(new Transaction { Id = transactionId, UserId = 1, Amount = 100, Description = "Original" });
+                context.Transactions.Add(new Transaction { Id = transactionId, UserId = 1, Amount = 100, Description = "Original", Category = "Test", Type = "Update" });
                 await context.SaveChangesAsync();
             }
 
@@ -138,7 +158,7 @@ namespace FinancialManagementSystem.Tests.Repositories
             var transactionId = 1;
             using (var context = new ApplicationDbContext(options))
             {
-                context.Transactions.Add(new Transaction { Id = transactionId, UserId = 1, Amount = 100, Description = "To Delete" });
+                context.Transactions.Add(new Transaction { Id = transactionId, UserId = 1, Amount = 100, Description = "To Delete", Category ="Test", Type = "Delete" });
                 await context.SaveChangesAsync();
             }
 

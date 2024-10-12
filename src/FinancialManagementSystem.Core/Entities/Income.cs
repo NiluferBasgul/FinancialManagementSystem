@@ -1,5 +1,4 @@
-﻿// FinancialManagementSystem.Core/Entities/Income.cs
-namespace FinancialManagementSystem.Core.Entities
+﻿namespace FinancialManagementSystem.Core.Entities
 {
     public class Income
     {

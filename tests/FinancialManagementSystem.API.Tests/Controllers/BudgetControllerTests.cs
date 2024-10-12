@@ -3,6 +3,7 @@ using FinancialManagementSystem.Core.Interfaces;
 using FinancialManagementSystem.Core.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using System.Security.Claims;
 using Xunit;
@@ -13,11 +14,13 @@ namespace FinancialManagementSystem.Tests.Controllers
     {
         private readonly Mock<IBudgetService> _mockBudgetService;
         private readonly BudgetController _controller;
+        private readonly Mock<ILogger<BudgetController>> _logger;
 
         public BudgetControllerTests()
         {
             _mockBudgetService = new Mock<IBudgetService>();
-            _controller = new BudgetController(_mockBudgetService.Object);
+            _logger = new Mock<ILogger<BudgetController>>();
+            _controller = new BudgetController(_mockBudgetService.Object, _logger.Object);
 
             // Setup ClaimsPrincipal for authorized user
             var claims = new List<Claim>
@@ -54,7 +57,7 @@ namespace FinancialManagementSystem.Tests.Controllers
         {
             // Arrange
             var userId = 1;
-            var model = new BudgetModel { Name = "New Budget", Amount = 1000, StartDate = DateTime.Now, EndDate = DateTime.Now.AddMonths(1) };
+            var model = new BudgetModel { Name = "New Budget", Amount = 1000, StartDate = System.DateTime.Now, EndDate = System.DateTime.Now.AddMonths(1) };
             _mockBudgetService.Setup(s => s.AddBudgetAsync(userId, model))
                 .ReturnsAsync(new BudgetResult { Succeeded = true, BudgetId = 1 });
 
@@ -69,5 +72,33 @@ namespace FinancialManagementSystem.Tests.Controllers
             Assert.Equal(1, returnValue.BudgetId);
         }
 
+        [Fact]
+        public async Task DeleteBudget_ReturnsNoContentResult()
+        {
+            // Arrange
+            var budgetId = 1;
+            _mockBudgetService.Setup(s => s.DeleteBudgetAsync(budgetId)).Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _controller.DeleteBudget(budgetId);
+
+            // Assert
+            Assert.IsType<NoContentResult>(result);
+        }
+
+        [Fact]
+        public async Task GetNeedsBudget_ReturnsOkResult()
+        {
+            // Arrange
+            var budgetId = 1;
+            var budget = new BudgetModel { Id = budgetId, Needs = 500 };
+            _mockBudgetService.Setup(s => s.GetBudgetAsync(budgetId)).ReturnsAsync(budget);
+
+            // Act
+            var result = await _controller.GetNeedsBudget(budgetId);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+        }
     }
 }

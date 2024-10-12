@@ -1,6 +1,6 @@
-﻿using FinancialManagementSystem.Core.Entities;
+﻿using FinancialManagementSystem.Core.Data;
+using FinancialManagementSystem.Core.Entities;
 using FinancialManagementSystem.Core.Repositories;
-using FinancialManagementSystem.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -10,7 +10,8 @@ namespace FinancialManagementSystem.Tests.Repositories
 {
     public class UserRepositoryTests
     {
-        private readonly Mock<ILogger<UserRepository>> _userRepository = new Mock<ILogger<UserRepository>>();
+        private readonly Mock<ILogger<UserRepository>> _loggerMock = new Mock<ILogger<UserRepository>>();
+
         private DbContextOptions<ApplicationDbContext> GetInMemoryDbContextOptions()
         {
             return new DbContextOptionsBuilder<ApplicationDbContext>()
@@ -33,8 +34,7 @@ namespace FinancialManagementSystem.Tests.Repositories
             // Act
             using (var context = new ApplicationDbContext(options))
             {
-                var logger = new Mock<ILogger<UserRepository>>().Object;
-                var repository = new UserRepository(context, logger);
+                var repository = new UserRepository(context, _loggerMock.Object);
                 var result = await repository.GetByIdAsync(1);
 
                 // Assert
@@ -58,8 +58,7 @@ namespace FinancialManagementSystem.Tests.Repositories
             // Act
             using (var context = new ApplicationDbContext(options))
             {
-                var logger = new Mock<ILogger<UserRepository>>().Object;
-                var repository = new UserRepository(context, logger);
+                var repository = new UserRepository(context, _loggerMock.Object);
                 var result = await repository.GetByUsernameAsync("testuser");
 
                 // Assert
@@ -78,8 +77,7 @@ namespace FinancialManagementSystem.Tests.Repositories
             // Act
             using (var context = new ApplicationDbContext(options))
             {
-                var logger = new Mock<ILogger<UserRepository>>().Object;
-                var repository = new UserRepository(context, logger);
+                var repository = new UserRepository(context, _loggerMock.Object);
                 await repository.AddAsync(newUser);
             }
 
@@ -108,9 +106,8 @@ namespace FinancialManagementSystem.Tests.Repositories
             // Act
             using (var context = new ApplicationDbContext(options))
             {
-                    var logger = new Mock<ILogger<UserRepository>>().Object;
-                    var repository = new UserRepository(context, logger);
-                    var userToUpdate = await repository.GetByIdAsync(userId);
+                var repository = new UserRepository(context, _loggerMock.Object);
+                var userToUpdate = await repository.GetByIdAsync(userId);
                 userToUpdate.Email = "updated@example.com";
                 await repository.UpdateAsync(userToUpdate);
             }
@@ -140,8 +137,7 @@ namespace FinancialManagementSystem.Tests.Repositories
             // Act
             using (var context = new ApplicationDbContext(options))
             {
-                var logger = new Mock<ILogger<UserRepository>>().Object;
-                var repository = new UserRepository(context, logger);
+                var repository = new UserRepository(context, _loggerMock.Object);
                 await repository.DeleteAsync(userId);
             }
 

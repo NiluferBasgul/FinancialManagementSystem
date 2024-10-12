@@ -72,6 +72,48 @@ namespace FinancialManagementSystem.Tests.Controllers
             Assert.Equal(incomeModel.Amount, returnValue.Amount);
         }
 
-        // Add more tests for other actions
+        [Fact]
+        public async Task UpdateIncome_ValidIncome_ReturnsNoContentResult()
+        {
+            // Arrange
+            var incomeModel = new IncomeModel { Id = 1, UserId = 1, Amount = 1000, Date = DateTime.Now, Description = "Salary", Category = "Work" };
+            _mockIncomeService.Setup(s => s.UpdateIncomeAsync(incomeModel)).ReturnsAsync(incomeModel);
+
+            // Act
+            var result = await _controller.UpdateIncome(incomeModel.Id, incomeModel);
+
+            // Assert
+            Assert.IsType<NoContentResult>(result);
+        }
+
+        [Fact]
+        public async Task DeleteIncome_ValidIncome_ReturnsNoContentResult()
+        {
+            // Arrange
+            var incomeId = 1;
+            _mockIncomeService.Setup(s => s.DeleteIncomeAsync(incomeId)).Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _controller.DeleteIncome(incomeId);
+
+            // Assert
+            Assert.IsType<NoContentResult>(result);
+        }
+
+        [Fact]
+        public async Task GetTotalIncomeForPeriod_ValidPeriod_ReturnsOkResult()
+        {
+            // Arrange
+            var startDate = DateTime.Now.AddDays(-30);
+            var endDate = DateTime.Now;
+            var totalIncome = 1500m;
+            _mockIncomeService.Setup(s => s.GetTotalIncomeForPeriodAsync(It.IsAny<int>(), startDate, endDate)).ReturnsAsync(totalIncome);
+
+            // Act
+            var result = await _controller.GetTotalIncomeForPeriod(startDate, endDate);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+        }
     }
 }

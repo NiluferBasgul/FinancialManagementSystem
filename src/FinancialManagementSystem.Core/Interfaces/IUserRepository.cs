@@ -11,6 +11,7 @@ namespace FinancialManagementSystem.Core.Interfaces
         Task<User> UpdateAsync(User user);
         Task DeleteAsync(int id);
         Task<IEnumerable<User>> GetAllAsync();
-
+        User GetUserById(int userId);
+        void UpdateAccount(User user);
     }
 }

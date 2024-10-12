@@ -1,8 +1,9 @@
-﻿// FinancialManagementSystem.Core/Models/IncomeModel.cs
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace FinancialManagementSystem.Core.Models
 {
+    [ExcludeFromCodeCoverage]
     public class IncomeModel
     {
         public int Id { get; set; }

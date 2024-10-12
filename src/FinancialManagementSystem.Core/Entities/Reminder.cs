@@ -1,6 +1,8 @@
-﻿// FinancialManagementSystem.Core/Entities/Reminder.cs
+﻿using System.Diagnostics.CodeAnalysis;
+
 namespace FinancialManagementSystem.Core.Entities
 {
+    [ExcludeFromCodeCoverage]
     public class Reminder
     {
         public int Id { get; set; }

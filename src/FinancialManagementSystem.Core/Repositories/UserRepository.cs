@@ -1,6 +1,6 @@
 ﻿using FinancialManagementSystem.Core.Entities;
 using FinancialManagementSystem.Core.Interfaces;
-using FinancialManagementSystem.Infrastructure.Data;
+using FinancialManagementSystem.Core.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -24,12 +24,12 @@ namespace FinancialManagementSystem.Core.Repositories
 
         public async Task<User> GetByUsernameAsync(string username)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == username.ToLower());
         }
 
         public async Task<User> GetByEmailAsync(string email)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
         }
 
         public async Task<User> AddAsync(User user)
@@ -61,6 +61,18 @@ namespace FinancialManagementSystem.Core.Repositories
         public async Task<IEnumerable<User>> GetAllAsync()
         {
             return await _context.Users.ToListAsync();
+        }
+
+        public User GetUserById(int userId)
+        {
+            return _context.Users.FirstOrDefault(u => u.Id == userId);
+        }
+
+        // Update user account after transfer
+        public void UpdateAccount(User user)
+        {
+            _context.Users.Update(user);
+            _context.SaveChanges();
         }
     }
 }

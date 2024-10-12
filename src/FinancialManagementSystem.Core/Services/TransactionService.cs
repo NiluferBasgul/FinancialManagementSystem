@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using FinancialManagementSystem.Core.Entities;
 using FinancialManagementSystem.Core.Interfaces;
-using FinancialManagementSystem.Core.Entities;
 using FinancialManagementSystem.Core.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace FinancialManagementSystem.Core.Services
@@ -19,11 +17,11 @@ namespace FinancialManagementSystem.Core.Services
             _logger = logger;
         }
 
-        public async Task<IEnumerable<Transaction>> GetTransactionsAsync(int userId)
+        public async Task<IEnumerable<Transaction>> GetTransactionsAsync(int userId, int skip, int take)
         {
             try
             {
-                var transactions = await _transactionRepository.GetTransactionsByUserIdAsync(userId);
+                var transactions = await _transactionRepository.GetTransactionsByUserIdAsync(userId, skip, take);
                 _logger.LogInformation($"Retrieved {transactions.Count()} transactions for user {userId}");
                 return transactions;
             }
@@ -54,11 +52,15 @@ namespace FinancialManagementSystem.Core.Services
                 _logger.LogInformation($"Transaction added for user {userId}: {model.Amount:C2} - {model.Description}");
                 return new TransactionResult { Succeeded = true, TransactionId = result.Id };
             }
+            catch (DbUpdateException ex)
+            {
+                _logger.LogError(ex, $"Database error while adding transaction for user {userId}");
+                return new TransactionResult { Succeeded = false, Errors = new List<string> { "Database error occurred" } };
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error adding transaction for user {userId}");
-return new TransactionResult { Succeeded = false, Errors = new List<string> { ex.Message } };
-
+                return new TransactionResult { Succeeded = false, Errors = new List<string> { ex.Message } };
             }
         }
 
@@ -102,15 +104,15 @@ return new TransactionResult { Succeeded = false, Errors = new List<string> { ex
                     return new TransactionResult { Succeeded = false, Errors = new List<string> { "Transaction not found or unauthorized" } };
                 }
 
-                await _transactionRepository.DeleteAsync(transaction);
-                _logger.LogInformation($"Transaction deleted: ID {transactionId}, User {userId}");
+                transaction.IsDeleted = true;
+                await _transactionRepository.UpdateAsync(transaction);
+                _logger.LogInformation($"Transaction soft deleted: ID {transactionId}, User {userId}");
                 return new TransactionResult { Succeeded = true };
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error deleting transaction: ID {transactionId}, User {userId}");
                 return new TransactionResult { Succeeded = false, Errors = new List<string> { ex.Message } };
-
             }
         }
     }

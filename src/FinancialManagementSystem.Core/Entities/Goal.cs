@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace FinancialManagementSystem.Core.Entities
 {
-    // FinancialManagementSystem.Core/Entities/Goal.cs
+    [ExcludeFromCodeCoverage]
     public class Goal
     {
         public int Id { get; set; }

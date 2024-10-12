@@ -1,7 +1,6 @@
-﻿// FinancialManagementSystem.Infrastructure/Repositories/IncomeRepository.cs
+﻿using FinancialManagementSystem.Core.Data;
 using FinancialManagementSystem.Core.Entities;
 using FinancialManagementSystem.Core.Interfaces;
-using FinancialManagementSystem.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinancialManagementSystem.Infrastructure.Repositories
@@ -17,7 +16,10 @@ namespace FinancialManagementSystem.Infrastructure.Repositories
 
         public async Task<IEnumerable<Income>> GetByUserIdAsync(int userId)
         {
-            return await _context.Incomes.Where(i => i.UserId == userId).ToListAsync();
+            return await _context.Incomes
+                .Where(i => i.UserId == userId)
+                .OrderBy(i => i.Date)
+                .ToListAsync();
         }
 
         public async Task<Income> GetByIdAsync(int id)
@@ -49,6 +51,13 @@ namespace FinancialManagementSystem.Infrastructure.Repositories
             return await _context.Incomes
                 .Where(i => i.UserId == userId && i.Date >= startDate && i.Date <= endDate)
                 .SumAsync(i => i.Amount);
+        }
+
+        public decimal GetTotalIncomeByUserId(int userId)
+        {
+            return _context.Incomes
+                .Where(i => i.UserId == userId)
+                .Sum(i => i.Amount);
         }
     }
 }

@@ -3,16 +3,14 @@ using FinancialManagementSystem.Core.Interfaces;
 using FinancialManagementSystem.Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace FinancialManagementSystem.API.Tests.Controllers
+namespace FinancialManagementSystem.API.Controllers
 {
-    // FinancialManagementSystem.API/Controllers/GoalController.cs
+    /// <summary>
+    /// Controller responsible for managing user goals.
+    /// </summary>
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
@@ -20,11 +18,19 @@ namespace FinancialManagementSystem.API.Tests.Controllers
     {
         private readonly IGoalService _goalService;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GoalController"/> class.
+        /// </summary>
+        /// <param name="goalService">Service for managing goals.</param>
         public GoalController(IGoalService goalService)
         {
             _goalService = goalService;
         }
 
+        /// <summary>
+        /// Retrieves the goals for the authenticated user.
+        /// </summary>
+        /// <returns>A list of goals for the user.</returns>
         [HttpGet]
         public async Task<IActionResult> GetGoals()
         {
@@ -33,6 +39,11 @@ namespace FinancialManagementSystem.API.Tests.Controllers
             return Ok(goals);
         }
 
+        /// <summary>
+        /// Retrieves a specific goal by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the goal.</param>
+        /// <returns>The requested goal if found, otherwise NotFound.</returns>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetGoal(int id)
         {
@@ -43,6 +54,11 @@ namespace FinancialManagementSystem.API.Tests.Controllers
             return Ok(goal);
         }
 
+        /// <summary>
+        /// Adds a new goal for the authenticated user.
+        /// </summary>
+        /// <param name="model">The goal model containing goal details.</param>
+        /// <returns>The created goal if successful, otherwise BadRequest.</returns>
         [HttpPost]
         public async Task<IActionResult> AddGoal(GoalModel model)
         {
@@ -52,6 +68,12 @@ namespace FinancialManagementSystem.API.Tests.Controllers
             return CreatedAtAction(nameof(GetGoal), new { id = result.Id }, result);
         }
 
+        /// <summary>
+        /// Updates an existing goal for the authenticated user.
+        /// </summary>
+        /// <param name="id">The ID of the goal to update.</param>
+        /// <param name="model">The updated goal model.</param>
+        /// <returns>NoContent if successful, otherwise BadRequest or NotFound.</returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateGoal(int id, GoalModel model)
         {
@@ -65,6 +87,11 @@ namespace FinancialManagementSystem.API.Tests.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Deletes a goal by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the goal to delete.</param>
+        /// <returns>NoContent if successful.</returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGoal(int id)
         {
@@ -72,6 +99,11 @@ namespace FinancialManagementSystem.API.Tests.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Retrieves personalized recommendations for a specific goal by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the goal.</param>
+        /// <returns>A list of personalized recommendations.</returns>
         [HttpGet("{id}/recommendations")]
         public async Task<IActionResult> GetRecommendations(int id)
         {

@@ -72,7 +72,7 @@ namespace FinancialManagementSystem.Core.Services
             {
                 var goal = MapToGoal(model);
                 var result = await _goalRepository.AddAsync(goal);
-                await _cacheService.RemoveAsync($"goals_{model.UserId}");
+                await _cacheService.RemoveAsync($"goals_{model.UserId}");  // Clear cache for this user
                 _logger.LogInformation($"Added new goal for user {model.UserId}: {model.Name}");
                 return MapToGoalModel(result);
             }
@@ -103,7 +103,7 @@ namespace FinancialManagementSystem.Core.Services
 
                 await _goalRepository.UpdateAsync(goal);
                 await _cacheService.RemoveAsync($"goals_{goal.UserId}");
-                await _cacheService.RemoveAsync($"goal_{goal.Id}");
+                await _cacheService.RemoveAsync($"goal_{goal.Id}");  // Clear cache for this goal
                 _logger.LogInformation($"Updated goal: ID {goal.Id}, User {goal.UserId}");
                 return MapToGoalModel(goal);
             }
@@ -129,6 +129,7 @@ namespace FinancialManagementSystem.Core.Services
                 else
                 {
                     _logger.LogWarning($"Attempted to delete non-existent goal with id {id}");
+                    throw new KeyNotFoundException("Goal not found");
                 }
             }
             catch (Exception ex)

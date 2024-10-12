@@ -8,6 +8,5 @@ namespace FinancialManagementSystem.Core.Interfaces
         Task<UserModel> UpdateUserAsync(UserUpdateModel model);
         Task<bool> DeleteUserAsync(int id);
         Task<IEnumerable<UserModel>> GetAllUsersAsync();
-
     }
 }

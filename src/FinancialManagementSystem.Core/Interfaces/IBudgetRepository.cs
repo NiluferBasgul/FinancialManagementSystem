@@ -9,5 +9,6 @@ namespace FinancialManagementSystem.Core.Interfaces
         Task<Budget> UpdateAsync(Budget budget);
         Task DeleteAsync(int id);
         Task<IEnumerable<Budget>> GetByUserIdAsync(int userId);
+        void SaveNeedsBudget(decimal needsAmount, int userId);
     }
 }

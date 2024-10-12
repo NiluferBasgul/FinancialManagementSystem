@@ -1,16 +1,13 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using FinancialManagementSystem.Core.Entities;
 using FinancialManagementSystem.Core.Interfaces;
-using FinancialManagementSystem.Core.Entities;
+using FinancialManagementSystem.Core.Models;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.IdentityModel.Tokens;
-using FinancialManagementSystem.Core.Models;
 using AuthResult = FinancialManagementSystem.Core.Models.AuthResult;
-using BCrypt.Net;
-using Microsoft.Extensions.Logging;
 
 namespace FinancialManagementSystem.Core.Services
 {
@@ -34,17 +31,17 @@ namespace FinancialManagementSystem.Core.Services
                 var user = await _userRepository.GetByUsernameAsync(model.Username);
                 if (user == null || !BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
                 {
-                    _logger.LogWarning($"Failed login attempt for username: {model.Username}");
+                    _logger.LogWarning($"Invalid login attempt for user: {model.Username}");
                     return new AuthResult { Succeeded = false, ErrorMessage = "Invalid username or password" };
                 }
 
                 var token = GenerateJwtToken(user);
-                _logger.LogInformation($"User logged in: {user.Username}");
+                _logger.LogInformation($"User logged in successfully: {user.Username}");
                 return new AuthResult { Succeeded = true, Token = token };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error during login for username: {model.Username}");
+                _logger.LogError(ex, "Error during login.");
                 throw;
             }
         }
@@ -53,6 +50,11 @@ namespace FinancialManagementSystem.Core.Services
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(model.Username) || string.IsNullOrWhiteSpace(model.Email) || string.IsNullOrWhiteSpace(model.Password))
+                {
+                    return new AuthResult { Succeeded = false, ErrorMessage = "Username, Email, and Password must be provided." };
+                }
+
                 if (await _userRepository.GetByUsernameAsync(model.Username) != null)
                 {
                     _logger.LogWarning($"Registration attempt with existing username: {model.Username}");
@@ -88,7 +90,10 @@ namespace FinancialManagementSystem.Core.Services
         public int? ValidateToken(string token)
         {
             if (string.IsNullOrEmpty(token))
+            {
+                _logger.LogWarning("Token is null or empty");
                 return null;
+            }
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Secret"]);
@@ -109,8 +114,9 @@ namespace FinancialManagementSystem.Core.Services
                 _logger.LogInformation($"Token validated for user ID: {userId}");
                 return userId;
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Token validation failed");
                 return null;
             }
         }
@@ -121,7 +127,11 @@ namespace FinancialManagementSystem.Core.Services
             var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Secret"]);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[] { new Claim("id", user.Id.ToString()) }),
+                Subject = new ClaimsIdentity(new[]
+                {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Username),
+            }),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };

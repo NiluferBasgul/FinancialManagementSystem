@@ -1,16 +1,10 @@
-﻿using FinancialManagementSystem.Core.Entities;
+﻿using FinancialManagementSystem.Core.Data;
+using FinancialManagementSystem.Core.Entities;
 using FinancialManagementSystem.Core.Interfaces;
-using FinancialManagementSystem.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FinancialManagementSystem.Core.Repositories
 {
-    // FinancialManagementSystem.Infrastructure/Repositories/GoalRepository.cs
     public class GoalRepository : IGoalRepository
     {
         private readonly ApplicationDbContext _context;

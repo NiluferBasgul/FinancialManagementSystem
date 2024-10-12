@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace FinancialManagementSystem.Core.Models
 {
+    [ExcludeFromCodeCoverage]
     public class UserUpdateModel
     {
         public int Id { get; set; }
@@ -14,5 +16,4 @@ namespace FinancialManagementSystem.Core.Models
         [EmailAddress]
         public string Email { get; set; }
     }
-
 }

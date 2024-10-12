@@ -1,7 +1,8 @@
-﻿using System;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace FinancialManagementSystem.Core.Entities
 {
+    [ExcludeFromCodeCoverage]
     public class Transaction
     {
         public int Id { get; set; }
@@ -10,17 +11,9 @@ namespace FinancialManagementSystem.Core.Entities
         public string Description { get; set; }
         public DateTime Date { get; set; }
         public string Category { get; set; }
-        public TransactionType Type { get; set; }
+        public string Type { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-
-        public User User { get; set; }
-
-    }
-
-    public enum TransactionType
-    {
-        Expense,
-        Income
+        public bool IsDeleted { get; set; }
     }
 }

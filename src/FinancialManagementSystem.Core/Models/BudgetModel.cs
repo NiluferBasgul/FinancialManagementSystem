@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace FinancialManagementSystem.Core.Models
 {
+    [ExcludeFromCodeCoverage]
     public class BudgetModel
     {
         public int Id { get; set; }
@@ -22,5 +24,6 @@ namespace FinancialManagementSystem.Core.Models
 
         [Required]
         public int UserId { get; set; }
+        public decimal Needs { get; set; }
     }
 }

@@ -1,5 +1,8 @@
-﻿namespace FinancialManagementSystem.Core.Models
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace FinancialManagementSystem.Core.Models
 {
+    [ExcludeFromCodeCoverage]
     public class BudgetResult
     {
         public bool Succeeded { get; set; }

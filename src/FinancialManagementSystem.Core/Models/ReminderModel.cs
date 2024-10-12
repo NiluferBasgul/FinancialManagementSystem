@@ -1,8 +1,9 @@
-﻿// FinancialManagementSystem.Core/Models/ReminderModel.cs
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace FinancialManagementSystem.Core.Models
 {
+    [ExcludeFromCodeCoverage]
     public class ReminderModel
     {
         public int Id { get; set; }

@@ -6,7 +6,7 @@ namespace FinancialManagementSystem.Core.Interfaces
 {
     public interface ITransactionRepository
     {
-        Task<IEnumerable<Transaction>> GetTransactionsByUserIdAsync(int userId);
+        Task<IEnumerable<Transaction>> GetTransactionsByUserIdAsync(int userId, int skip, int take);
         Task<Transaction> GetByIdAsync(int id);
         Task<Transaction> AddAsync(Transaction transaction);
         Task UpdateAsync(Transaction transaction);
