@@ -15,7 +15,7 @@ namespace FinancialManagementSystem.Core.Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseMySql(
-                "Server=junction.proxy.rlwy.net;Port=47703;Database=railway;User=root;Password=dDoOkkMytDinrgTTbfIkOyEQzqjfNOYy",
+                "Server=mysql.railway.internal;Port=3306;Database=railway;User=root;Password=dDoOkkMytDinrgTTbfIkOyEQzqjfNOYy",
                 new MySqlServerVersion(new Version(9, 0, 0)) // Adjust MySQL version as necessary
             );
         }
