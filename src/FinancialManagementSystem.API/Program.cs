@@ -17,7 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-var connectionString = builder.Configuration.GetConnectionString("DbConnection");
+var connectionString = "Server=junction.proxy.rlwy.net;Port=47703;Database=railway;User=root;Password=dDoOkkMytDinrgTTbfIkOyEQzqjfNOYy"
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
