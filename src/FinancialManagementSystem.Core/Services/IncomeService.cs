@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace FinancialManagementSystem.Core.Services
 {
@@ -79,8 +80,8 @@ namespace FinancialManagementSystem.Core.Services
 
                 income.Amount = model.Amount;
                 income.Date = model.Date;
-                income.Description = model.Description;
-                income.Category = model.Category;
+                income.Description = model.Tax;
+                income.Category = model.Type;
 
                 await _incomeRepository.UpdateAsync(income);
                 _logger.LogInformation($"Income updated: ID {model.Id}, User {model.UserId}");
@@ -130,6 +131,20 @@ namespace FinancialManagementSystem.Core.Services
             }
         }
 
+        public async Task DeleteAllIncomesAsync()
+        {
+            try
+            {
+                await _incomeRepository.DeleteAllIncomesAsync();
+                _logger.LogInformation("All incomes have been deleted.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while deleting all incomes.");
+                throw;
+            }
+        }
+
         private IncomeModel MapToIncomeModel(Income income)
         {
             return new IncomeModel
@@ -138,8 +153,8 @@ namespace FinancialManagementSystem.Core.Services
                 UserId = income.UserId,
                 Amount = income.Amount,
                 Date = income.Date,
-                Description = income.Description,
-                Category = income.Category
+                Tax = income.Description,
+                Type = income.Category
             };
         }
 
@@ -150,8 +165,8 @@ namespace FinancialManagementSystem.Core.Services
                 UserId = model.UserId,
                 Amount = model.Amount,
                 Date = model.Date,
-                Description = model.Description,
-                Category = model.Category
+                Description = model.Tax,
+                Category = model.Type
             };
         }
     }

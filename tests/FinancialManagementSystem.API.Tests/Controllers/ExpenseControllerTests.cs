@@ -65,8 +65,8 @@ namespace FinancialManagementSystem.Tests.Controllers
         {
             // Arrange
             var userId = 1;
-            var model = new ExpenseModel { Id = 1, Amount = 100, Description = "New Expense", Date = DateTime.Now, Category = "Test" };
-            var expenseEntity = new Expense { Id = 1, Amount = 100, Description = "New Expense", Date = DateTime.Now, Category = "Test" }; // Corresponding entity
+            var model = new ExpenseModel { Id = 1, Amount = 100, Description = "New Expense", Date = DateTime.Now, Category = "Test", Pay ="Cash" };
+            var expenseEntity = new Expense { Id = 1, Amount = 100, Description = "New Expense", Date = DateTime.Now, Category = "Test", Pay ="Cash" }; 
 
             _mockExpenseService.Setup(s => s.AddExpenseAsync(It.IsAny<ExpenseModel>(), userId)).ReturnsAsync(expenseEntity);
 
@@ -81,7 +81,7 @@ namespace FinancialManagementSystem.Tests.Controllers
         public async Task UpdateExpense_ValidExpense_ReturnsNoContentResult()
         {
             // Arrange
-            var model = new ExpenseModel { Id = 1, Amount = 200, Description = "Updated Expense", Date = DateTime.Now, Category = "Updated" };
+            var model = new ExpenseModel { Id = 1, Amount = 200, Description = "Updated Expense", Date = DateTime.Now, Category = "Updated", Pay ="Cash" };
             _mockExpenseService.Setup(s => s.UpdateExpenseAsync(model)).Returns(Task.CompletedTask);
 
             // Act
@@ -110,7 +110,7 @@ namespace FinancialManagementSystem.Tests.Controllers
         {
             // Arrange
             var userId = 1;
-            var summary = new FinancialSummary
+            var summary = new FinancialSummaryResult
             {
                 TotalIncome = 5000,
                 TotalExpenses = 2000,
@@ -123,7 +123,7 @@ namespace FinancialManagementSystem.Tests.Controllers
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var returnValue = Assert.IsType<FinancialSummary>(okResult.Value);
+            var returnValue = Assert.IsType<FinancialSummaryResult>(okResult.Value);
             Assert.Equal(5000, returnValue.TotalIncome);
             Assert.Equal(2000, returnValue.TotalExpenses);
             Assert.Equal(3000, returnValue.TotalSavings);

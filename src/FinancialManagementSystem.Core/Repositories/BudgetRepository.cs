@@ -57,7 +57,8 @@ namespace FinancialManagementSystem.Core.Repositories
             var budget = _context.Budgets.FirstOrDefault(b => b.UserId == userId);
             if (budget != null)
             {
-                budget.Needs = needsAmount;
+                budget.Needs.Clear(); // Assuming you're now using a collection of needs categories
+                budget.Needs.Add(new BudgetCategory { Category = "General", Value = needsAmount });
                 _context.SaveChanges();
             }
         }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 
 namespace FinancialManagementSystem.Core.Models
@@ -24,6 +25,10 @@ namespace FinancialManagementSystem.Core.Models
 
         [Required]
         public int UserId { get; set; }
-        public decimal Needs { get; set; }
+
+        // Collections for Needs, Wants, and Savings
+        public List<BudgetCategoryModel> Needs { get; set; } = new List<BudgetCategoryModel>();
+        public List<BudgetCategoryModel> Wants { get; set; } = new List<BudgetCategoryModel>();
+        public List<BudgetCategoryModel> Savings { get; set; } = new List<BudgetCategoryModel>();
     }
 }

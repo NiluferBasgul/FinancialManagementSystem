@@ -19,11 +19,11 @@ namespace FinancialManagementSystem.Core.Models
         public DateTime Date { get; set; }
 
         [Required]
-        [StringLength(100, ErrorMessage = "Description cannot be longer than 100 characters")]
-        public string Description { get; set; }
+        [StringLength(100, ErrorMessage = "Tax cannot be longer than 100 characters")]
+        public string Tax { get; set; }
 
         [Required]
-        [StringLength(50, ErrorMessage = "Category cannot be longer than 50 characters")]
-        public string Category { get; set; }
+        [StringLength(50, ErrorMessage = "Type cannot be longer than 50 characters")]
+        public string Type { get; set; }
     }
 }

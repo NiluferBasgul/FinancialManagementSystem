@@ -12,8 +12,9 @@ namespace FinancialManagementSystem.Core.Entities
         public DateTime EndDate { get; set; }
         public int UserId { get; set; }
         public User User { get; set; }
-        public decimal Needs { get; set; }
-        public decimal Wants { get; set; }
-        public decimal Savings { get; set; }
+
+        public ICollection<BudgetCategory> Needs { get; set; } = new List<BudgetCategory>();
+        public ICollection<BudgetCategory> Wants { get; set; } = new List<BudgetCategory>();
+        public ICollection<BudgetCategory> Savings { get; set; } = new List<BudgetCategory>();
     }
 }

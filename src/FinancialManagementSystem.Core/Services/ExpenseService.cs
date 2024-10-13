@@ -1,6 +1,7 @@
 ﻿using FinancialManagementSystem.Core.Entities;
 using FinancialManagementSystem.Core.Interfaces;
 using FinancialManagementSystem.Core.Models;
+using FinancialManagementSystem.Core.Models.Response;
 using FinancialManagementSystem.Infrastructure.Repositories;
 using Microsoft.Extensions.Logging;
 using System;
@@ -38,7 +39,8 @@ namespace FinancialManagementSystem.Core.Services
                     Amount = model.Amount,
                     Description = model.Description,
                     Date = model.Date,
-                    Category = model.Category
+                    Category = model.Category,
+                    Pay = model.Pay
                 };
 
                 return await _expenseRepository.AddExpenseAsync(expense);
@@ -71,13 +73,13 @@ namespace FinancialManagementSystem.Core.Services
             await _expenseRepository.DeleteExpenseAsync(id);
         }
 
-        public FinancialSummary GetFinancialSummary(int userId)
+        public FinancialSummaryResult GetFinancialSummary(int userId)
         {
             var totalIncome = _incomeRepository.GetTotalIncomeByUserId(userId); // Fetch from income repository
             var totalExpenses = _expenseRepository.GetTotalExpensesByUserId(userId); // Fetch from expenses repository
             var totalSavings = totalIncome - totalExpenses;
 
-            return new FinancialSummary
+            return new FinancialSummaryResult
             {
                 TotalIncome = totalIncome,
                 TotalExpenses = totalExpenses,

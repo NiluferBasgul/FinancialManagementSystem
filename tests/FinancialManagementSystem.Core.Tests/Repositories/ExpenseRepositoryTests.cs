@@ -27,9 +27,9 @@ namespace FinancialManagementSystem.Tests.Repositories
             using (var context = new ApplicationDbContext(options))
             {
                 context.Expenses.AddRange(
-                    new Expense { Id = 1, UserId = userId, Amount = 100, Date = DateTime.Now.AddDays(-4), Category ="Test", Description ="Test" },
-                    new Expense { Id = 2, UserId = userId, Amount = 200, Date = DateTime.Now.AddDays(-2),Category = "Test1", Description = "Test1" },
-                    new Expense { Id = 3, UserId = 2, Amount = 300, Date = DateTime.Now.AddDays(-1), Category = "Test2", Description = "Test2" }
+                    new Expense { Id = 1, UserId = userId, Amount = 100, Date = DateTime.Now.AddDays(-4), Category ="Test", Description ="Test", Pay = "Cash" },
+                    new Expense { Id = 2, UserId = userId, Amount = 200, Date = DateTime.Now.AddDays(-2),Category = "Test1", Description = "Test1", Pay = "Cash" },
+                    new Expense { Id = 3, UserId = 2, Amount = 300, Date = DateTime.Now.AddDays(-1), Category = "Test2", Description = "Test2", Pay = "Cash" }
                 );
                 await context.SaveChangesAsync();
             }
@@ -100,7 +100,8 @@ namespace FinancialManagementSystem.Tests.Repositories
                 Amount = 500,
                 Date = DateTime.Now,
                 Description = "Test Expense",
-                Category = "Test"
+                Category = "Test",
+                Pay = "Cash"
             };
 
             // Act

@@ -22,5 +22,10 @@ namespace FinancialManagementSystem.Core.Models
         [Required(ErrorMessage = "Category is required")]
         [StringLength(50, ErrorMessage = "Category cannot exceed 50 characters")]
         public string Category { get; set; }
+
+
+        [Required(ErrorMessage = "Pay is required")]
+        [StringLength(50, ErrorMessage = "Pay cannot exceed 50 characters")]
+        public string Pay { get; set; }
     }
 }

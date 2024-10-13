@@ -1,4 +1,5 @@
 ﻿using FinancialManagementSystem.Core.Models;
+using FinancialManagementSystem.Core.Models.Response;
 using System.Threading.Tasks;
 
 namespace FinancialManagementSystem.Core.Interfaces

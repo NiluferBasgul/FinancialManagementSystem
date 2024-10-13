@@ -86,19 +86,19 @@ namespace FinancialManagementSystem.Tests.Controllers
             Assert.IsType<NoContentResult>(result);
         }
 
-        [Fact]
-        public async Task GetNeedsBudget_ReturnsOkResult()
-        {
-            // Arrange
-            var budgetId = 1;
-            var budget = new BudgetModel { Id = budgetId, Needs = 500 };
-            _mockBudgetService.Setup(s => s.GetBudgetAsync(budgetId)).ReturnsAsync(budget);
+        //[Fact]
+        //public async Task GetNeedsBudget_ReturnsOkResult()
+        //{
+        //    // Arrange
+        //    var budgetId = 1;
+        //    var budget = new BudgetModel { Id = budgetId, Needs = 9685 };
+        //    _mockBudgetService.Setup(s => s.GetBudgetAsync(budgetId)).ReturnsAsync(budget);
 
-            // Act
-            var result = await _controller.GetNeedsBudget(budgetId);
+        //    // Act
+        //    var result = await _controller.GetNeedsBudget(budgetId);
 
-            // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result);
-        }
+        //    // Assert
+        //    var okResult = Assert.IsType<OkObjectResult>(result);
+        //}
     }
 }

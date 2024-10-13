@@ -55,7 +55,7 @@ namespace FinancialManagementSystem.Tests.Services
             // Assert
             Assert.NotNull(result);
             Assert.Equal(incomeId, result.Id);
-            Assert.Equal("Salary", result.Description);
+            Assert.Equal("Salary", result.Tax);
         }
 
         [Fact]
@@ -76,7 +76,7 @@ namespace FinancialManagementSystem.Tests.Services
         public async Task AddIncomeAsync_ReturnsAddedIncomeModel()
         {
             // Arrange
-            var incomeModel = new IncomeModel { UserId = 1, Amount = 1000, Date = DateTime.Now, Description = "Salary", Category = "Work" };
+            var incomeModel = new IncomeModel { UserId = 1, Amount = 1000, Date = DateTime.Now, Tax = "Salary", Type = "Work" };
             var income = new Income { Id = 1, UserId = 1, Amount = 1000, Date = DateTime.Now, Description = "Salary", Category = "Work" };
             _mockIncomeRepository.Setup(r => r.AddAsync(It.IsAny<Income>())).ReturnsAsync(income);
 
@@ -86,14 +86,14 @@ namespace FinancialManagementSystem.Tests.Services
             // Assert
             Assert.Equal(1, result.Id);
             Assert.Equal(incomeModel.Amount, result.Amount);
-            Assert.Equal(incomeModel.Description, result.Description);
+            Assert.Equal(incomeModel.Tax, result.Tax);
         }
 
         [Fact]
         public async Task AddIncomeAsync_ThrowsException_LogsError()
         {
             // Arrange
-            var incomeModel = new IncomeModel { UserId = 1, Amount = 1000, Date = DateTime.Now, Description = "Salary", Category = "Work" };
+            var incomeModel = new IncomeModel { UserId = 1, Amount = 1000, Date = DateTime.Now, Tax = "Salary", Type = "Work" };
             _mockIncomeRepository.Setup(r => r.AddAsync(It.IsAny<Income>())).ThrowsAsync(new Exception("Database error"));
 
             // Act & Assert
@@ -106,7 +106,7 @@ namespace FinancialManagementSystem.Tests.Services
         {
             // Arrange
             var incomeId = 1;
-            var model = new IncomeModel { Id = incomeId, UserId = 1, Amount = 1500, Date = DateTime.Now, Description = "Updated Salary", Category = "Work" };
+            var model = new IncomeModel { Id = incomeId, UserId = 1, Amount = 1500, Date = DateTime.Now, Tax = "Updated Salary", Type = "Work" };
             var income = new Income { Id = incomeId, UserId = 1, Amount = 1000, Date = DateTime.Now, Description = "Salary", Category = "Work" };
 
             _mockIncomeRepository.Setup(r => r.GetByIdAsync(incomeId)).ReturnsAsync(income);
@@ -118,14 +118,14 @@ namespace FinancialManagementSystem.Tests.Services
             // Assert
             Assert.NotNull(result);
             Assert.Equal(1500, result.Amount);
-            Assert.Equal("Updated Salary", result.Description);
+            Assert.Equal("Updated Salary", result.Tax);
         }
 
         [Fact]
         public async Task UpdateIncomeAsync_NonExistingIncome_ReturnsNull()
         {
             // Arrange
-            var model = new IncomeModel { Id = 999, UserId = 1, Amount = 1000, Date = DateTime.Now, Description = "Salary", Category = "Work" };
+            var model = new IncomeModel { Id = 999, UserId = 1, Amount = 1000, Date = DateTime.Now, Tax = "Salary", Type = "Work" };
             _mockIncomeRepository.Setup(r => r.GetByIdAsync(model.Id)).ReturnsAsync((Income)null);
 
             // Act

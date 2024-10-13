@@ -75,17 +75,22 @@ namespace FinancialManagementSystem.API.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return BadRequest(ModelState);  // Returns validation errors if the model is not valid
             }
 
+            // Extract the userId from the JWT token claims
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+            // Assign the UserId to the model
             model.UserId = userId;
+
+            // Pass the model to the service layer to handle saving it to the database
             var result = await _incomeService.AddIncomeAsync(model);
+
+            // Return a 201 Created response, with the location pointing to the GetIncome method
             return CreatedAtAction(nameof(GetIncome), new { id = result.Id }, result);
         }
 
-        /// <summary>
-        /// Updates an existing income by ID.
         /// </summary>
         /// <param name="id">The ID of the income to update.</param>
         /// <param name="model">Income model with updated details.</param>
@@ -132,6 +137,18 @@ namespace FinancialManagementSystem.API.Controllers
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
             var total = await _incomeService.GetTotalIncomeForPeriodAsync(userId, startDate, endDate);
             return Ok(new { TotalIncome = total });
+        }
+
+        /// <summary>
+        /// Deletes all.
+        /// </summary>
+        /// <returns>NoContent if successful, otherwise NotFound.</returns>
+        [HttpDelete]
+        [Route("DeleteAll")]
+        public async Task<IActionResult> DeleteAllIncomes()
+        {
+            await _incomeService.DeleteAllIncomesAsync();
+            return NoContent();
         }
     }
 }

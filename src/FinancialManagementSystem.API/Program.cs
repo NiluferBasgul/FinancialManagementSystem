@@ -40,7 +40,6 @@ builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<ICacheService, CacheService>();
-builder.Services.AddScoped<INeedsRepository, NeedsRepository>();
 builder.Services.AddScoped<IUserService>(provider =>
     new UserService(
         provider.GetRequiredService<IUserRepository>(),

@@ -3,6 +3,7 @@ using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 using FinancialManagementSystem.Core.Entities;
 using FinancialManagementSystem.Core.Models;
+using FinancialManagementSystem.Core.Models.Response;
 
 namespace FinancialManagementSystem.Core.Interfaces
 {

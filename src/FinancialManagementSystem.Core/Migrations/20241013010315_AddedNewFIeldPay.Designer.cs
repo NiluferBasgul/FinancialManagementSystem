@@ -4,6 +4,7 @@ using FinancialManagementSystem.Core.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FinancialManagementSystem.Core.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241013010315_AddedNewFIeldPay")]
+    partial class AddedNewFIeldPay
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,7 +43,7 @@ namespace FinancialManagementSystem.Core.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Accounts", (string)null);
+                    b.ToTable("Accounts");
                 });
 
             modelBuilder.Entity("FinancialManagementSystem.Core.Entities.Budget", b =>
@@ -63,58 +65,29 @@ namespace FinancialManagementSystem.Core.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("Needs")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Savings")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Budgets", (string)null);
-                });
-
-            modelBuilder.Entity("FinancialManagementSystem.Core.Entities.BudgetCategory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("BudgetId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("BudgetId1")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("BudgetId2")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("BudgetId3")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("Value")
+                    b.Property<decimal>("Wants")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BudgetId");
+                    b.HasIndex("UserId");
 
-                    b.HasIndex("BudgetId1");
-
-                    b.HasIndex("BudgetId2");
-
-                    b.HasIndex("BudgetId3");
-
-                    b.ToTable("BudgetCategories", (string)null);
+                    b.ToTable("Budgets");
                 });
 
             modelBuilder.Entity("FinancialManagementSystem.Core.Entities.Expense", b =>
@@ -153,7 +126,7 @@ namespace FinancialManagementSystem.Core.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Expenses", (string)null);
+                    b.ToTable("Expenses");
                 });
 
             modelBuilder.Entity("FinancialManagementSystem.Core.Entities.Goal", b =>
@@ -192,7 +165,7 @@ namespace FinancialManagementSystem.Core.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Goals", (string)null);
+                    b.ToTable("Goals");
                 });
 
             modelBuilder.Entity("FinancialManagementSystem.Core.Entities.Income", b =>
@@ -227,7 +200,7 @@ namespace FinancialManagementSystem.Core.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Incomes", (string)null);
+                    b.ToTable("Incomes");
                 });
 
             modelBuilder.Entity("FinancialManagementSystem.Core.Entities.Reminder", b =>
@@ -261,7 +234,7 @@ namespace FinancialManagementSystem.Core.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Reminders", (string)null);
+                    b.ToTable("Reminders");
                 });
 
             modelBuilder.Entity("FinancialManagementSystem.Core.Entities.Transaction", b =>
@@ -273,6 +246,7 @@ namespace FinancialManagementSystem.Core.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Category")
@@ -304,7 +278,11 @@ namespace FinancialManagementSystem.Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Transactions", (string)null);
+                    b.HasIndex("Date");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("FinancialManagementSystem.Core.Entities.User", b =>
@@ -347,7 +325,7 @@ namespace FinancialManagementSystem.Core.Migrations
                         .IsUnique()
                         .HasFilter("[Username] IS NOT NULL");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("FinancialManagementSystem.Core.Entities.Account", b =>
@@ -370,39 +348,6 @@ namespace FinancialManagementSystem.Core.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("FinancialManagementSystem.Core.Entities.BudgetCategory", b =>
-                {
-                    b.HasOne("FinancialManagementSystem.Core.Entities.Budget", "Budget")
-                        .WithMany()
-                        .HasForeignKey("BudgetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_BudgetCategory_Budget");
-
-                    b.HasOne("FinancialManagementSystem.Core.Entities.Budget", null)
-                        .WithMany("Savings")
-                        .HasForeignKey("BudgetId1");
-
-                    b.HasOne("FinancialManagementSystem.Core.Entities.Budget", null)
-                        .WithMany("Needs")
-                        .HasForeignKey("BudgetId2");
-
-                    b.HasOne("FinancialManagementSystem.Core.Entities.Budget", null)
-                        .WithMany("Wants")
-                        .HasForeignKey("BudgetId3");
-
-                    b.Navigation("Budget");
-                });
-
-            modelBuilder.Entity("FinancialManagementSystem.Core.Entities.Budget", b =>
-                {
-                    b.Navigation("Needs");
-
-                    b.Navigation("Savings");
-
-                    b.Navigation("Wants");
                 });
 
             modelBuilder.Entity("FinancialManagementSystem.Core.Entities.User", b =>

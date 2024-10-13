@@ -11,5 +11,6 @@ namespace FinancialManagementSystem.Core.Interfaces
         Task<IncomeModel> UpdateIncomeAsync(IncomeModel model);
         Task DeleteIncomeAsync(int id);
         Task<decimal> GetTotalIncomeForPeriodAsync(int userId, DateTime startDate, DateTime endDate);
+        Task DeleteAllIncomesAsync();
     }
 }

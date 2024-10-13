@@ -31,9 +31,13 @@ namespace FinancialManagementSystem.API.Controllers
         /// <summary>
         /// Retrieves the user's expenses within a specified date range.
         /// </summary>
-        /// <param name="from">Start date of the range.</param>
-        /// <param name="to">End date of the range.</param>
-        /// <returns>A list of expenses for the user.</returns>
+        /// <param name="from">Start date of the range. Format: yyyy-MM-ddTHH:mm:ssZ. Example: 2023-10-01T00:00:00Z</param>
+        /// <param name="to">End date of the range. Format: yyyy-MM-ddTHH:mm:ssZ. Example: 2023-10-31T23:59:59Z</param>
+        /// <returns>A list of expenses for the user within the specified date range.</returns>
+        /// <remarks>
+        /// Sample request:
+        /// GET /api/expenses?from=2023-10-01T00:00:00Z&amp;to=2023-10-31T23:59:59Z
+        /// </remarks>
         [HttpGet]
         public async Task<IActionResult> GetExpenses([FromQuery] DateTime from, [FromQuery] DateTime to)
         {

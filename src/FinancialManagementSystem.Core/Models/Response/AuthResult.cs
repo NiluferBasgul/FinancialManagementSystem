@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace FinancialManagementSystem.Core.Models
+namespace FinancialManagementSystem.Core.Models.Response
 {
     [ExcludeFromCodeCoverage]
     public class AuthResult

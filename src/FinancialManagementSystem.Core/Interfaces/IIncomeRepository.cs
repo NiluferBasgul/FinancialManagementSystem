@@ -1,5 +1,4 @@
-﻿// FinancialManagementSystem.Core/Interfaces/IIncomeRepository.cs
-using FinancialManagementSystem.Core.Entities;
+﻿using FinancialManagementSystem.Core.Entities;
 
 namespace FinancialManagementSystem.Core.Interfaces
 {
@@ -12,5 +11,6 @@ namespace FinancialManagementSystem.Core.Interfaces
         Task DeleteAsync(Income income);
         Task<decimal> GetTotalIncomeForPeriodAsync(int userId, DateTime startDate, DateTime endDate);
         decimal GetTotalIncomeByUserId(int userId);
+        Task DeleteAllIncomesAsync();
     }
 }

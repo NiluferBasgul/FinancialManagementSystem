@@ -4,6 +4,7 @@ using FinancialManagementSystem.Core.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FinancialManagementSystem.Core.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241013124253_AddedNewBudgetCategoryEntity")]
+    partial class AddedNewBudgetCategoryEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,7 +43,7 @@ namespace FinancialManagementSystem.Core.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Accounts", (string)null);
+                    b.ToTable("Accounts");
                 });
 
             modelBuilder.Entity("FinancialManagementSystem.Core.Entities.Budget", b =>
@@ -73,7 +75,7 @@ namespace FinancialManagementSystem.Core.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Budgets", (string)null);
+                    b.ToTable("Budgets");
                 });
 
             modelBuilder.Entity("FinancialManagementSystem.Core.Entities.BudgetCategory", b =>
@@ -114,7 +116,7 @@ namespace FinancialManagementSystem.Core.Migrations
 
                     b.HasIndex("BudgetId3");
 
-                    b.ToTable("BudgetCategories", (string)null);
+                    b.ToTable("BudgetCategories");
                 });
 
             modelBuilder.Entity("FinancialManagementSystem.Core.Entities.Expense", b =>
@@ -153,7 +155,7 @@ namespace FinancialManagementSystem.Core.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Expenses", (string)null);
+                    b.ToTable("Expenses");
                 });
 
             modelBuilder.Entity("FinancialManagementSystem.Core.Entities.Goal", b =>
@@ -192,7 +194,7 @@ namespace FinancialManagementSystem.Core.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Goals", (string)null);
+                    b.ToTable("Goals");
                 });
 
             modelBuilder.Entity("FinancialManagementSystem.Core.Entities.Income", b =>
@@ -227,7 +229,7 @@ namespace FinancialManagementSystem.Core.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Incomes", (string)null);
+                    b.ToTable("Incomes");
                 });
 
             modelBuilder.Entity("FinancialManagementSystem.Core.Entities.Reminder", b =>
@@ -261,7 +263,7 @@ namespace FinancialManagementSystem.Core.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Reminders", (string)null);
+                    b.ToTable("Reminders");
                 });
 
             modelBuilder.Entity("FinancialManagementSystem.Core.Entities.Transaction", b =>
@@ -304,7 +306,7 @@ namespace FinancialManagementSystem.Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Transactions", (string)null);
+                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("FinancialManagementSystem.Core.Entities.User", b =>
@@ -347,7 +349,7 @@ namespace FinancialManagementSystem.Core.Migrations
                         .IsUnique()
                         .HasFilter("[Username] IS NOT NULL");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("FinancialManagementSystem.Core.Entities.Account", b =>

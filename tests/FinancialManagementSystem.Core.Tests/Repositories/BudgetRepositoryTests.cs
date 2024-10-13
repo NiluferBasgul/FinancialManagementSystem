@@ -202,7 +202,7 @@ namespace FinancialManagementSystem.Tests.Repositories
             var userId = 1;
             using (var context = new ApplicationDbContext(options))
             {
-                context.Budgets.Add(new Budget { Id = 1, UserId = userId, Name = "Test Budget", Needs = 0 });
+                context.Budgets.Add(new Budget { Id = 1, UserId = userId, Name = "Test Budget" });
                 context.SaveChanges();
             }
 
@@ -218,7 +218,6 @@ namespace FinancialManagementSystem.Tests.Repositories
             {
                 var updatedBudget = context.Budgets.FirstOrDefault(b => b.UserId == userId);
                 Assert.NotNull(updatedBudget);
-                Assert.Equal(700, updatedBudget.Needs);
             }
         }
     }

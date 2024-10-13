@@ -59,5 +59,12 @@ namespace FinancialManagementSystem.Infrastructure.Repositories
                 .Where(i => i.UserId == userId)
                 .Sum(i => i.Amount);
         }
+
+        public async Task DeleteAllIncomesAsync()
+        {
+            var incomes = await _context.Incomes.ToListAsync();
+            _context.Incomes.RemoveRange(incomes);
+            await _context.SaveChangesAsync();
+        }
     }
 }

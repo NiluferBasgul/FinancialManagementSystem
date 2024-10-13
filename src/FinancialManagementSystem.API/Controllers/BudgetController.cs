@@ -16,78 +16,80 @@ namespace FinancialManagementSystem.API.Controllers
         private readonly IBudgetService _budgetService;
         private readonly ILogger<BudgetController> _logger;
 
-        /// <summary>
-        /// Constructor that injects the budget service and logger.
-        /// </summary>
-        /// <param name="budgetService">Service for handling budget operations.</param>
-        /// <param name="logger">Logger instance.</param>
         public BudgetController(IBudgetService budgetService, ILogger<BudgetController> logger)
         {
             _budgetService = budgetService;
             _logger = logger;
         }
 
-        /// <summary>
-        /// Retrieves the budgets for the authenticated user.
-        /// </summary>
-        /// <returns>A list of user budgets.</returns>
+        #region Helper Methods
+
+        private int? GetAuthenticatedUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim != null && int.TryParse(userIdClaim.Value, out var userId))
+            {
+                return userId;
+            }
+
+            return null;
+        }
+
+        #endregion
+
+        #region Budget Management
+
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetBudgets()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-            {
-                return Unauthorized();
-            }
+            var userId = GetAuthenticatedUserId();
+            if (userId == null) return Unauthorized();
 
-            var userId = int.Parse(userIdClaim.Value);
-            var budgets = await _budgetService.GetBudgetsAsync(userId);
-            return Ok(budgets);
+            try
+            {
+                var budgets = await _budgetService.GetBudgetsAsync(userId.Value);
+                return Ok(budgets);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving budgets");
+                return StatusCode(500, "Internal server error");
+            }
         }
 
-        /// <summary>
-        /// Adds a new budget for the authenticated user.
-        /// </summary>
-        /// <param name="model">Budget model containing budget details like name and amount.</param>
-        /// <returns>Created budget if successful, otherwise BadRequest with validation errors.</returns>
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> AddBudget(BudgetModel model)
+        public async Task<IActionResult> AddBudget([FromBody] BudgetModel model)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-            {
-                return Unauthorized();
-            }
+            var userId = GetAuthenticatedUserId();
+            if (userId == null) return Unauthorized();
 
-            var userId = int.Parse(userIdClaim.Value);
-            var result = await _budgetService.AddBudgetAsync(userId, model);
-            if (result.Succeeded)
+            try
             {
-                return CreatedAtAction(nameof(GetBudgets), new { id = result.BudgetId }, result);
+                var result = await _budgetService.AddBudgetAsync(userId.Value, model);
+                if (result.Succeeded)
+                {
+                    return CreatedAtAction(nameof(GetBudgets), new { id = result.BudgetId }, result);
+                }
+                return BadRequest(result.Errors);
             }
-
-            return BadRequest(result.Errors);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding budget");
+                return StatusCode(500, "Internal server error");
+            }
         }
 
-        /// <summary>
-        /// Deletes a budget by its ID for the authenticated user.
-        /// </summary>
-        /// <param name="id">The ID of the budget to delete.</param>
-        /// <returns>NoContent if successful, otherwise BadRequest with an error message.</returns>
         [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBudget(int id)
         {
+            var userId = GetAuthenticatedUserId();
+            if (userId == null) return Unauthorized();
+
             try
             {
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-                if (userIdClaim == null)
-                {
-                    return Unauthorized();
-                }
-
                 await _budgetService.DeleteBudgetAsync(id);
                 return NoContent();
             }
@@ -98,86 +100,143 @@ namespace FinancialManagementSystem.API.Controllers
             }
         }
 
-        /// <summary>
-        /// Retrieves the current active tab for the budget management interface.
-        /// </summary>
-        /// <returns>Current active tab.</returns>
-        [Authorize]
-        [HttpGet("currentTab")]
-        public IActionResult GetCurrentTab()
-        {
-            var currentTab = _budgetService.GetCurrentTab();
-            return Ok(new { currentTab });
-        }
+        #endregion
 
-        /// <summary>
-        /// Sets the current active tab in the budget management interface.
-        /// </summary>
-        /// <param name="tabName">Name of the tab to set as active.</param>
-        /// <returns>Ok if successful.</returns>
-        [Authorize]
-        [HttpPost("setTab")]
-        public IActionResult SetTab([FromBody] string tabName)
-        {
-            _budgetService.SetTab(tabName);
-            return Ok();
-        }
+        #region Needs, Wants, and Savings
 
-        /// <summary>
-        /// Retrieves the needs budget for the authenticated user.
-        /// </summary>
-        /// <returns>The needs portion of the budget.</returns>
         [Authorize]
         [HttpGet("needs")]
-        public IActionResult GetNeedsBudget()
+        public async Task<IActionResult> GetNeedsBudget()
         {
-            var needsBudget = _budgetService.GetNeedsBudget();
-            return Ok(new { needsBudget });
+            return await GetBudgetCategories("needs", async (userId) => await _budgetService.GetNeedsBudgetAsync(userId));
         }
 
-        /// <summary>
-        /// Submits the needs portion of the budget for a specific budget ID.
-        /// </summary>
-        /// <param name="budgetId">The ID of the budget.</param>
-        /// <param name="needsAmount">The amount allocated to needs.</param>
-        /// <returns>Ok if successful.</returns>
+        [Authorize]
+        [HttpGet("wants")]
+        public async Task<IActionResult> GetWantsBudget()
+        {
+            return await GetBudgetCategories("wants", async (userId) => await _budgetService.GetWantsBudgetAsync(userId));
+        }
+
         [Authorize]
         [HttpPost("submitNeeds")]
-        public async Task<IActionResult> SubmitNeeds(int budgetId, decimal needsAmount)
+        public async Task<IActionResult> SubmitNeeds([FromBody] List<BudgetCategoryModel> needs)
         {
-            await _budgetService.UpdateNeedsAmount(budgetId, needsAmount);
-            return Ok();
-        }
-
-        /// <summary>
-        /// Retrieves the needs portion of a specific budget by ID.
-        /// </summary>
-        /// <param name="id">The ID of the budget.</param>
-        /// <returns>The needs portion of the specified budget.</returns>
-        [Authorize]
-        [HttpGet("{id}/needs")]
-        public async Task<IActionResult> GetNeedsBudget(int id)
-        {
-            var budget = await _budgetService.GetBudgetAsync(id);
-            if (budget == null)
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
             {
-                return NotFound("Budget not found");
+                return Unauthorized();
             }
 
-            return Ok(new { Needs = budget.Needs });
+            var userId = int.Parse(userIdClaim.Value);
+
+            if (needs == null || !needs.Any())
+            {
+                return BadRequest("Needs data is required.");
+            }
+
+            // Calculate total spent on needs
+            decimal totalSpentOnNeeds = needs.Sum(n => n.Value);
+
+            // Update the needs for the user
+            var result = await _budgetService.UpdateNeedsAmount(userId, needs);
+
+            if (result)
+            {
+                return Ok(new { totalSpentOnNeeds });
+            }
+
+            return BadRequest("Failed to submit needs");
         }
 
-        /// <summary>
-        /// Transfers funds between accounts in the budget.
-        /// </summary>
-        /// <param name="transferRequest">Transfer request model containing details of the transfer.</param>
-        /// <returns>Ok if successful, otherwise BadRequest with an error message.</returns>
+
+        [Authorize]
+        [HttpPost("submitWants")]
+        public async Task<IActionResult> SubmitWants([FromBody] List<BudgetCategoryModel> wants)
+        {
+            return await SubmitBudgetCategories("wants", wants, async (userId) => await _budgetService.UpdateWantsAmount(userId, wants));
+        }
+
+        private async Task<IActionResult> GetBudgetCategories(string categoryType, Func<int, Task<IEnumerable<BudgetCategoryModel>>> fetchCategories)
+        {
+            var userId = GetAuthenticatedUserId();
+            if (userId == null) return Unauthorized();
+
+            try
+            {
+                var categories = await fetchCategories(userId.Value);
+                return Ok(new { categoryType, categories });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error retrieving {categoryType} budget");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        private async Task<IActionResult> SubmitBudgetCategories(string categoryType, List<BudgetCategoryModel> categories, Func<int, Task> submitCategories)
+        {
+            var userId = GetAuthenticatedUserId();
+            if (userId == null) return Unauthorized();
+
+            try
+            {
+                await submitCategories(userId.Value);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error submitting {categoryType} budget");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        #endregion
+
+        #region Budget Totals
+
+        [Authorize]
+        [HttpGet("totals")]
+        public async Task<IActionResult> GetBudgetTotals()
+        {
+            var userId = GetAuthenticatedUserId();
+            if (userId == null) return Unauthorized();
+
+            try
+            {
+                var totals = await _budgetService.GetBudgetTotalsAsync(userId.Value);
+                return Ok(totals);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving budget totals");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        #endregion
+
+        #region Tab Management
+        #endregion
+
+        #region Fund Transfers
+
         [Authorize]
         [HttpPost("transfer")]
         public IActionResult TransferFunds([FromBody] TransferRequest transferRequest)
         {
-            _budgetService.TransferFunds(transferRequest);
-            return Ok(new { message = "Transfer successful" });
+            try
+            {
+                _budgetService.TransferFunds(transferRequest);
+                return Ok(new { message = "Transfer successful" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error transferring funds");
+                return BadRequest(new { message = ex.Message });
+            }
         }
+
+        #endregion
     }
 }

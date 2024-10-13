@@ -1,5 +1,6 @@
 ﻿using FinancialManagementSystem.Core.Entities;
 using FinancialManagementSystem.Core.Models;
+using FinancialManagementSystem.Core.Models.Response;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace FinancialManagementSystem.Core.Interfaces
         Task UpdateExpenseAsync(ExpenseModel model);
         Task DeleteExpenseAsync(int id);
 
-        FinancialSummary GetFinancialSummary(int userId);
+        FinancialSummaryResult GetFinancialSummary(int userId);
 
     }
 

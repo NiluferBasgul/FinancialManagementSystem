@@ -10,12 +10,13 @@ namespace FinancialManagementSystem.Core.Interfaces
         Task<BudgetModel> UpdateBudgetAsync(BudgetModel model);
         Task DeleteBudgetAsync(int id);
         Task<BudgetResult> AddBudgetAsync(int userId, BudgetModel model);
-        string GetCurrentTab();
-        void SetTab(string tabName);
-        decimal GetNeedsBudget();
-        Task<bool> SubmitNeedsAsync(decimal needsAmount, int userId);
         void TransferFunds(TransferRequest transferRequest);
-        Task UpdateNeedsAmount(int budgetId, decimal needsAmount);
+        Task<bool> UpdateNeedsAmount(int userId, List<BudgetCategoryModel> needs);
+        Task<IEnumerable<BudgetCategoryModel>> GetNeedsBudgetAsync(int userId);
+        Task<IEnumerable<BudgetCategoryModel>> GetWantsBudgetAsync(int userId);
+        Task<BudgetTotalsModel> GetBudgetTotalsAsync(int userId);
+        Task UpdateWantsAmount(int budgetId, List<BudgetCategoryModel> wants);
+
 
     }
 }

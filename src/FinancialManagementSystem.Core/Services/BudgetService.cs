@@ -12,9 +12,12 @@ namespace FinancialManagementSystem.Core.Services
         private readonly ILogger<BudgetService> _logger;
         private readonly IAccountRepository _accountRepository;
         private string _currentTab;
-        private decimal _needsBudget;
 
-        public BudgetService(IBudgetRepository budgetRepository, IUserRepository userRepository, ILogger<BudgetService> logger, IAccountRepository accountRepository)
+        public BudgetService(
+            IBudgetRepository budgetRepository,
+            IUserRepository userRepository,
+            ILogger<BudgetService> logger,
+            IAccountRepository accountRepository)
         {
             _budgetRepository = budgetRepository;
             _userRepository = userRepository;
@@ -22,30 +25,14 @@ namespace FinancialManagementSystem.Core.Services
             _accountRepository = accountRepository;
         }
 
+        #region Budget Management
+
         public async Task<BudgetModel> CreateBudgetAsync(BudgetModel model)
         {
+            ValidateBudgetModel(model);
+
             try
             {
-                if (model.UserId <= 0)
-                {
-                    throw new ArgumentException("Invalid user ID");
-                }
-
-                if (string.IsNullOrEmpty(model.Name))
-                {
-                    throw new ArgumentException("Budget name cannot be empty");
-                }
-
-                if (model.Amount <= 0)
-                {
-                    throw new ArgumentException("Budget amount must be greater than zero");
-                }
-
-                if (model.StartDate >= model.EndDate)
-                {
-                    throw new ArgumentException("End date must be later than start date");
-                }
-
                 var budget = new Budget
                 {
                     Name = model.Name,
@@ -73,8 +60,9 @@ namespace FinancialManagementSystem.Core.Services
                 if (budget == null)
                 {
                     _logger.LogWarning($"Budget with id {id} not found");
+                    return null;
                 }
-                return budget != null ? MapToBudgetModel(budget) : null;
+                return MapToBudgetModel(budget);
             }
             catch (Exception ex)
             {
@@ -100,30 +88,17 @@ namespace FinancialManagementSystem.Core.Services
 
         public async Task<BudgetModel> UpdateBudgetAsync(BudgetModel model)
         {
-            try
+            var budget = await _budgetRepository.GetByIdAsync(model.Id);
+            if (budget == null)
             {
-                var budget = await _budgetRepository.GetByIdAsync(model.Id);
-                if (budget == null)
-                {
-                    _logger.LogWarning($"Budget with id {model.Id} not found for update");
-                    return null;
-                }
-
-                budget.Name = model.Name;
-                budget.Amount = model.Amount;
-                budget.StartDate = model.StartDate;
-                budget.EndDate = model.EndDate;
-                budget.Needs = model.Needs;
-
-                var result = await _budgetRepository.UpdateAsync(budget);
-                _logger.LogInformation($"Budget updated: ID {model.Id}, User {budget.UserId}");
-                return MapToBudgetModel(result);
+                _logger.LogWarning($"Budget with id {model.Id} not found for update");
+                return null;
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error updating budget with id {model.Id}");
-                throw;
-            }
+
+            MapToBudgetEntity(model, budget);
+            await _budgetRepository.UpdateAsync(budget);
+
+            return MapToBudgetModel(budget);
         }
 
         public async Task DeleteBudgetAsync(int id)
@@ -139,69 +114,6 @@ namespace FinancialManagementSystem.Core.Services
                 throw;
             }
         }
-
-        public async Task<BudgetResult> AddBudgetAsync(int userId, BudgetModel model)
-        {
-            try
-            {
-                model.UserId = userId;
-                var budget = new Budget
-                {
-                    Name = model.Name,
-                    Amount = model.Amount,
-                    StartDate = model.StartDate,
-                    EndDate = model.EndDate,
-                    UserId = userId
-                };
-
-                var result = await _budgetRepository.AddAsync(budget);
-                _logger.LogInformation($"Budget added for user {userId}: {model.Name}");
-                return new BudgetResult { Succeeded = true, BudgetId = result.Id };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error adding budget for user {userId}");
-                return new BudgetResult { Succeeded = false, Errors = new List<string> { ex.Message } };
-            }
-        }
-        public string GetCurrentTab()
-        {
-            return "Needs";
-        }
-
-        public void SetTab(string tabName)
-        {
-            _currentTab = tabName;
-        }
-
-        public decimal GetNeedsBudget()
-        {
-            return 500.00M;
-        }
-
-        public async Task<bool> SubmitNeedsAsync(decimal needsAmount, int userId)
-        {
-            var user = _userRepository.GetUserById(userId);
-            if (user == null)
-            {
-                return false;
-            }
-
-            _needsBudget = needsAmount;
-            _budgetRepository.SaveNeedsBudget(needsAmount, userId);
-            return true;
-        }
-
-        public async Task UpdateNeedsAmount(int budgetId, decimal needsAmount)
-        {
-            var budget = await _budgetRepository.GetByIdAsync(budgetId);
-            if (budget != null)
-            {
-                budget.Needs = needsAmount;
-                await _budgetRepository.UpdateAsync(budget);
-            }
-        }
-
         public void TransferFunds(TransferRequest transferRequest)
         {
             var fromAccount = _accountRepository.GetById(transferRequest.FromAccountId);
@@ -230,6 +142,180 @@ namespace FinancialManagementSystem.Core.Services
                 throw new InvalidOperationException("Insufficient funds.");
             }
         }
+        public async Task<BudgetResult> AddBudgetAsync(int userId, BudgetModel model)
+        {
+            ValidateBudgetModel(model);
+            model.UserId = userId;
+
+            try
+            {
+                var budget = new Budget
+                {
+                    Name = model.Name,
+                    Amount = model.Amount,
+                    StartDate = model.StartDate,
+                    EndDate = model.EndDate,
+                    UserId = userId
+                };
+
+                var result = await _budgetRepository.AddAsync(budget);
+                _logger.LogInformation($"Budget added for user {userId}: {model.Name}");
+                return new BudgetResult { Succeeded = true, BudgetId = result.Id };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error adding budget for user {userId}");
+                return new BudgetResult { Succeeded = false, Errors = new List<string> { ex.Message } };
+            }
+        }
+
+        #endregion
+
+        #region Needs, Wants, and Savings
+
+        public async Task<IEnumerable<BudgetCategoryModel>> GetNeedsBudgetAsync(int userId)
+        {
+            var budgets = await _budgetRepository.GetByUserIdAsync(userId);
+            if (budgets == null || !budgets.Any())
+            {
+                _logger.LogWarning($"No budget found for user {userId}");
+                return new List<BudgetCategoryModel>(); // Return an empty list to avoid null issues
+            }
+
+            return budgets.SelectMany(b => b.Needs)
+                          .Select(n => new BudgetCategoryModel { Category = n.Category, Value = n.Value });
+        }
+
+
+        public async Task<IEnumerable<BudgetCategoryModel>> GetWantsBudgetAsync(int userId)
+        {
+            return await GetBudgetCategoriesAsync(userId, "Wants");
+        }
+
+        public async Task<bool> UpdateNeedsAmount(int userId, List<BudgetCategoryModel> needs)
+        {
+            // Assuming each user has one budget
+            var budget = (await _budgetRepository.GetByUserIdAsync(userId)).FirstOrDefault();
+
+            if (budget == null)
+            {
+                _logger.LogWarning($"No budget found for user {userId}");
+                return false;
+            }
+
+            // Clear existing needs and add the updated needs
+            budget.Needs.Clear();
+            foreach (var need in needs)
+            {
+                budget.Needs.Add(new BudgetCategory
+                {
+                    Category = need.Category,
+                    Value = need.Value,
+                });
+            }
+
+            await _budgetRepository.UpdateAsync(budget);
+            return true;
+        }
+
+
+        public async Task UpdateWantsAmount(int budgetId, List<BudgetCategoryModel> wants)
+        {
+            await UpdateBudgetCategories(budgetId, wants, "Wants");
+        }
+
+        private async Task<IEnumerable<BudgetCategoryModel>> GetBudgetCategoriesAsync(int userId, string categoryType)
+        {
+            var budgets = await _budgetRepository.GetByUserIdAsync(userId);
+            return categoryType switch
+            {
+                "Needs" => budgets.SelectMany(b => b.Needs).Select(MapToBudgetCategoryModel),
+                "Wants" => budgets.SelectMany(b => b.Wants).Select(MapToBudgetCategoryModel),
+                _ => throw new ArgumentException("Invalid category type")
+            };
+        }
+
+        private async Task UpdateBudgetCategories(int budgetId, List<BudgetCategoryModel> categories, string categoryType)
+        {
+            var budget = await _budgetRepository.GetByIdAsync(budgetId);
+            if (budget == null)
+            {
+                _logger.LogWarning($"Budget with id {budgetId} not found for update");
+                return;
+            }
+
+            switch (categoryType)
+            {
+                case "Needs":
+                    UpdateCategoryList(budget.Needs, categories);
+                    break;
+                case "Wants":
+                    UpdateCategoryList(budget.Wants, categories);
+                    break;
+                default:
+                    throw new ArgumentException("Invalid category type");
+            }
+
+            await _budgetRepository.UpdateAsync(budget);
+        }
+
+        private void UpdateCategoryList(ICollection<BudgetCategory> existingCategories, List<BudgetCategoryModel> newCategories)
+        {
+            existingCategories.Clear();
+            foreach (var category in newCategories)
+            {
+                existingCategories.Add(new BudgetCategory
+                {
+                    Category = category.Category,
+                    Value = category.Value
+                });
+            }
+        }
+
+        #endregion
+
+        #region Budget Totals
+
+        public async Task<BudgetTotalsModel> GetBudgetTotalsAsync(int userId)
+        {
+            var budgets = await _budgetRepository.GetByUserIdAsync(userId);
+            var needs = budgets.Sum(b => b.Needs.Sum(n => n.Value));
+            var wants = budgets.Sum(b => b.Wants.Sum(w => w.Value));
+
+            return new BudgetTotalsModel
+            {
+                Needs = needs,
+                Wants = wants,
+                Income = 10000 // Placeholder for income logic
+            };
+        }
+
+        #endregion
+
+        #region Utility Methods
+
+        private void ValidateBudgetModel(BudgetModel model)
+        {
+            if (model.UserId <= 0)
+            {
+                throw new ArgumentException("Invalid user ID");
+            }
+
+            if (string.IsNullOrEmpty(model.Name))
+            {
+                throw new ArgumentException("Budget name cannot be empty");
+            }
+
+            if (model.Amount <= 0)
+            {
+                throw new ArgumentException("Budget amount must be greater than zero");
+            }
+
+            if (model.StartDate >= model.EndDate)
+            {
+                throw new ArgumentException("End date must be later than start date");
+            }
+        }
 
         private BudgetModel MapToBudgetModel(Budget budget)
         {
@@ -240,8 +326,32 @@ namespace FinancialManagementSystem.Core.Services
                 Amount = budget.Amount,
                 StartDate = budget.StartDate,
                 EndDate = budget.EndDate,
-                UserId = budget.UserId
+                UserId = budget.UserId,
+                Needs = budget.Needs.Select(MapToBudgetCategoryModel).ToList(),
+                Wants = budget.Wants.Select(MapToBudgetCategoryModel).ToList(),
             };
         }
+
+        private BudgetCategoryModel MapToBudgetCategoryModel(BudgetCategory category)
+        {
+            return new BudgetCategoryModel
+            {
+                Category = category.Category,
+                Value = category.Value
+            };
+        }
+
+        private void MapToBudgetEntity(BudgetModel model, Budget budget)
+        {
+            budget.Name = model.Name;
+            budget.Amount = model.Amount;
+            budget.StartDate = model.StartDate;
+            budget.EndDate = model.EndDate;
+
+            UpdateCategoryList(budget.Needs, model.Needs);
+            UpdateCategoryList(budget.Wants, model.Wants);
+        }
+
+        #endregion
     }
 }

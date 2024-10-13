@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace FinancialManagementSystem.Core.Models
 {
     [ExcludeFromCodeCoverage]
-    public class FinancialSummary
+    public class FinancialSummaryResult
     {
         public decimal TotalIncome { get; set; }
         public decimal TotalExpenses { get; set; }

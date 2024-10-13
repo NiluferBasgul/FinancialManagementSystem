@@ -41,8 +41,8 @@ namespace FinancialManagementSystem.Tests.Controllers
             var userId = 1;
             var incomes = new List<IncomeModel>
             {
-                new IncomeModel { Id = 1, UserId = userId, Amount = 1000, Date = DateTime.Now, Description = "Salary", Category = "Work" },
-                new IncomeModel { Id = 2, UserId = userId, Amount = 500, Date = DateTime.Now, Description = "Freelance", Category = "Work" }
+                new IncomeModel { Id = 1, UserId = userId, Amount = 1000, Date = DateTime.Now, Tax = "Salary", Type = "Work" },
+                new IncomeModel { Id = 2, UserId = userId, Amount = 500, Date = DateTime.Now, Tax = "Freelance", Type = "Work" }
             };
             _mockIncomeService.Setup(s => s.GetIncomesAsync(userId)).ReturnsAsync(incomes);
 
@@ -59,7 +59,7 @@ namespace FinancialManagementSystem.Tests.Controllers
         public async Task AddIncome_ReturnsCreatedAtActionResult()
         {
             // Arrange
-            var incomeModel = new IncomeModel { UserId = 1, Amount = 1000, Date = DateTime.Now, Description = "Salary", Category = "Work" };
+            var incomeModel = new IncomeModel { UserId = 1, Amount = 1000, Date = DateTime.Now, Tax = "Salary", Type = "Work" };
             _mockIncomeService.Setup(s => s.AddIncomeAsync(It.IsAny<IncomeModel>())).ReturnsAsync(incomeModel);
 
             // Act
@@ -76,7 +76,7 @@ namespace FinancialManagementSystem.Tests.Controllers
         public async Task UpdateIncome_ValidIncome_ReturnsNoContentResult()
         {
             // Arrange
-            var incomeModel = new IncomeModel { Id = 1, UserId = 1, Amount = 1000, Date = DateTime.Now, Description = "Salary", Category = "Work" };
+            var incomeModel = new IncomeModel { Id = 1, UserId = 1, Amount = 1000, Date = DateTime.Now, Tax = "Salary", Type = "Work" };
             _mockIncomeService.Setup(s => s.UpdateIncomeAsync(incomeModel)).ReturnsAsync(incomeModel);
 
             // Act

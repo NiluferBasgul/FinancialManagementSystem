@@ -7,7 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using AuthResult = FinancialManagementSystem.Core.Models.AuthResult;
+using AuthResult = FinancialManagementSystem.Core.Models.Response.AuthResult;
 
 namespace FinancialManagementSystem.Core.Services
 {
