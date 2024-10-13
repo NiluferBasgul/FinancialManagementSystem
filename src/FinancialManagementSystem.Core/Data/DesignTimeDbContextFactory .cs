@@ -18,8 +18,6 @@ namespace FinancialManagementSystem.Core.Data
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
             var connectionString = configuration.GetConnectionString("DbConnection");
 
-            optionsBuilder.UseSqlServer(connectionString);
-
             return new ApplicationDbContext(optionsBuilder.Options);
         }
     }

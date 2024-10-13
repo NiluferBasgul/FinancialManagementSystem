@@ -12,6 +12,16 @@ namespace FinancialManagementSystem.Core.Data
         {
         }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseMySql(
+                "Server=junction.proxy.rlwy.net;Port=47703;Database=railway;User=root;Password=dDoOkkMytDinrgTTbfIkOyEQzqjfNOYy",
+                new MySqlServerVersion(new Version(9, 0, 0)) // Adjust MySQL version as necessary
+            );
+        }
+
+        // Remove the OnConfiguring method since the options are now passed via Dependency Injection
+
         public DbSet<User> Users { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Budget> Budgets { get; set; }
