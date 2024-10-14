@@ -3,10 +3,6 @@ using FinancialManagementSystem.Core.Interfaces;
 using FinancialManagementSystem.Core.Interfaces.FinancialManagementSystem.Core.Services;
 using FinancialManagementSystem.Core.Models;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FinancialManagementSystem.Core.Services
 {

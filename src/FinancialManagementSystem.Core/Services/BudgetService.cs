@@ -172,20 +172,18 @@ namespace FinancialManagementSystem.Core.Services
         #endregion
 
         #region Needs, Wants, and Savings
-
         public async Task<IEnumerable<BudgetCategoryModel>> GetNeedsBudgetAsync(int userId)
         {
             var budgets = await _budgetRepository.GetByUserIdAsync(userId);
             if (budgets == null || !budgets.Any())
             {
                 _logger.LogWarning($"No budget found for user {userId}");
-                return new List<BudgetCategoryModel>(); // Return an empty list to avoid null issues
+                return new List<BudgetCategoryModel>(); 
             }
 
             return budgets.SelectMany(b => b.Needs)
                           .Select(n => new BudgetCategoryModel { Category = n.Category, Value = n.Value });
         }
-
 
         public async Task<IEnumerable<BudgetCategoryModel>> GetWantsBudgetAsync(int userId)
         {
@@ -194,16 +192,27 @@ namespace FinancialManagementSystem.Core.Services
 
         public async Task<bool> UpdateNeedsAmount(int userId, List<BudgetCategoryModel> needs)
         {
-            // Assuming each user has one budget
             var budget = (await _budgetRepository.GetByUserIdAsync(userId)).FirstOrDefault();
 
             if (budget == null)
             {
-                _logger.LogWarning($"No budget found for user {userId}");
-                return false;
+                _logger.LogInformation($"No budget found for user {userId}. Creating a new budget.");
+
+                budget = new Budget
+                {
+                    UserId = userId,
+                    Name = "Default Budget",
+                    Amount = needs.Sum(n => n.Value) ?? 0,
+                    StartDate = DateTime.UtcNow,
+                    EndDate = DateTime.UtcNow.AddMonths(1),
+                    Needs = new List<BudgetCategory>(),
+                    Savings = new List<BudgetCategory>(),
+                    Wants = new List<BudgetCategory>()
+                };
+
+                await _budgetRepository.AddAsync(budget);
             }
 
-            // Clear existing needs and add the updated needs
             budget.Needs.Clear();
             foreach (var need in needs)
             {
@@ -211,6 +220,7 @@ namespace FinancialManagementSystem.Core.Services
                 {
                     Category = need.Category,
                     Value = need.Value,
+                    NeedsBudgetId = budget.Id, 
                 });
             }
 
@@ -218,10 +228,41 @@ namespace FinancialManagementSystem.Core.Services
             return true;
         }
 
-
-        public async Task UpdateWantsAmount(int budgetId, List<BudgetCategoryModel> wants)
+        public async Task UpdateWantsAmount(int userId, List<BudgetCategoryModel> wants)
         {
-            await UpdateBudgetCategories(budgetId, wants, "Wants");
+            var budget = (await _budgetRepository.GetByUserIdAsync(userId)).FirstOrDefault();
+
+            if (budget == null)
+            {
+                _logger.LogInformation($"No budget found for user {userId}. Creating a new budget.");
+
+                budget = new Budget
+                {
+                    UserId = userId,
+                    Name = "Default Budget",
+                    Amount = wants.Sum(w => w.Value) ?? 0,
+                    StartDate = DateTime.UtcNow,
+                    EndDate = DateTime.UtcNow.AddMonths(1),
+                    Wants = new List<BudgetCategory>()
+                };
+
+                await _budgetRepository.AddAsync(budget);
+            }
+
+            budget.Wants.Clear();
+            foreach (var want in wants)
+            {
+                budget.Wants.Add(new BudgetCategory
+                {
+                    Category = want.Category,
+                    Value = want.Value,
+                    WantsBudgetId = budget.Id, 
+                    NeedsBudgetId = null,  
+                    SavingsBudgetId = null    
+                });
+            }
+
+            await _budgetRepository.UpdateAsync(budget);
         }
 
         private async Task<IEnumerable<BudgetCategoryModel>> GetBudgetCategoriesAsync(int userId, string categoryType)
@@ -234,6 +275,7 @@ namespace FinancialManagementSystem.Core.Services
                 _ => throw new ArgumentException("Invalid category type")
             };
         }
+
 
         private async Task UpdateBudgetCategories(int budgetId, List<BudgetCategoryModel> categories, string categoryType)
         {
@@ -286,7 +328,7 @@ namespace FinancialManagementSystem.Core.Services
             {
                 Needs = needs,
                 Wants = wants,
-                Income = 10000 // Placeholder for income logic
+                Income = 10000
             };
         }
 

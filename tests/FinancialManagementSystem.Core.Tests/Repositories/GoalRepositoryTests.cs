@@ -27,7 +27,7 @@ namespace FinancialManagementSystem.Tests.Repositories
                 context.Goals.AddRange(
                     new Goal { Id = 1, UserId = userId, Name = "Goal 1", TargetAmount = 500 },
                     new Goal { Id = 2, UserId = userId, Name = "Goal 2", TargetAmount = 1500 },
-                    new Goal { Id = 3, UserId = 2, Name = "Other User's Goal", TargetAmount = 2000 } 
+                    new Goal { Id = 3, UserId = 2, Name = "Other User's Goal", TargetAmount = 2000 }
                 );
                 await context.SaveChangesAsync();
             }

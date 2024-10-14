@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 
 namespace FinancialManagementSystem.Core.Entities
 {
+    [ExcludeFromCodeCoverage]
     public class BudgetCategory
     {
         public int Id { get; set; }
@@ -12,9 +14,8 @@ namespace FinancialManagementSystem.Core.Entities
 
         [Required]
         [Range(0, double.MaxValue)]
-        public decimal Value { get; set; }
+        public decimal? Value { get; set; }
 
-        // Define explicit foreign keys for each relationship
         [ForeignKey("NeedsBudget")]
         public int? NeedsBudgetId { get; set; }
         public Budget NeedsBudget { get; set; }
@@ -27,4 +28,5 @@ namespace FinancialManagementSystem.Core.Entities
         public int? SavingsBudgetId { get; set; }
         public Budget SavingsBudget { get; set; }
     }
+
 }

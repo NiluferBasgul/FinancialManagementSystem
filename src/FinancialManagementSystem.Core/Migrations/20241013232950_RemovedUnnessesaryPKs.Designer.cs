@@ -4,6 +4,7 @@ using FinancialManagementSystem.Core.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FinancialManagementSystem.Core.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241013232950_RemovedUnnessesaryPKs")]
+    partial class RemovedUnnessesaryPKs
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -87,9 +89,11 @@ namespace FinancialManagementSystem.Core.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<int?>("NeedsBudgetId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<int?>("SavingsBudgetId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<decimal?>("Value")
@@ -97,6 +101,7 @@ namespace FinancialManagementSystem.Core.Migrations
                         .HasColumnType("decimal(65,30)");
 
                     b.Property<int?>("WantsBudgetId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -375,17 +380,20 @@ namespace FinancialManagementSystem.Core.Migrations
                     b.HasOne("FinancialManagementSystem.Core.Entities.Budget", "NeedsBudget")
                         .WithMany("Needs")
                         .HasForeignKey("NeedsBudgetId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("FinancialManagementSystem.Core.Entities.Budget", "SavingsBudget")
                         .WithMany("Savings")
                         .HasForeignKey("SavingsBudgetId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("FinancialManagementSystem.Core.Entities.Budget", "WantsBudget")
                         .WithMany("Wants")
                         .HasForeignKey("WantsBudgetId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("NeedsBudget");
 

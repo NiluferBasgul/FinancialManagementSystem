@@ -1,5 +1,8 @@
-﻿namespace FinancialManagementSystem.Core.Entities
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace FinancialManagementSystem.Core.Entities
 {
+    [ExcludeFromCodeCoverage]
     public class Income
     {
         public int Id { get; set; }

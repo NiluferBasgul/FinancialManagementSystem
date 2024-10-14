@@ -1,10 +1,8 @@
-﻿using FinancialManagementSystem.Core.Entities;
-using FinancialManagementSystem.Core.Interfaces;
+﻿using FinancialManagementSystem.Core.Interfaces;
 using FinancialManagementSystem.Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace FinancialManagementSystem.API.Controllers
 {

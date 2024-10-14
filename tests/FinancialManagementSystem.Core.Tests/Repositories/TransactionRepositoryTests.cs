@@ -24,9 +24,9 @@ namespace FinancialManagementSystem.Tests.Repositories
             using (var context = new ApplicationDbContext(options))
             {
                 context.Transactions.AddRange(
-                    new Transaction { Id = 1, UserId = userId, Amount = 100, Description = "Test 1", Date = DateTime.Now.AddDays(-1), Category ="Test", Type= "Test" },
+                    new Transaction { Id = 1, UserId = userId, Amount = 100, Description = "Test 1", Date = DateTime.Now.AddDays(-1), Category = "Test", Type = "Test" },
                     new Transaction { Id = 2, UserId = userId, Amount = 200, Description = "Test 2", Date = DateTime.Now, Category = "Test", Type = "Test" },
-                    new Transaction { Id = 3, UserId = 2, Amount = 300, Description = "Other user", Date = DateTime.Now , Category = "Test", Type = "Get" }
+                    new Transaction { Id = 3, UserId = 2, Amount = 300, Description = "Other user", Date = DateTime.Now, Category = "Test", Type = "Get" }
                 );
                 await context.SaveChangesAsync();
             }
@@ -158,7 +158,7 @@ namespace FinancialManagementSystem.Tests.Repositories
             var transactionId = 1;
             using (var context = new ApplicationDbContext(options))
             {
-                context.Transactions.Add(new Transaction { Id = transactionId, UserId = 1, Amount = 100, Description = "To Delete", Category ="Test", Type = "Delete" });
+                context.Transactions.Add(new Transaction { Id = transactionId, UserId = 1, Amount = 100, Description = "To Delete", Category = "Test", Type = "Delete" });
                 await context.SaveChangesAsync();
             }
 

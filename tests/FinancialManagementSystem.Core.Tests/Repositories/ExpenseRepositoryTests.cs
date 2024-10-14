@@ -27,8 +27,8 @@ namespace FinancialManagementSystem.Tests.Repositories
             using (var context = new ApplicationDbContext(options))
             {
                 context.Expenses.AddRange(
-                    new Expense { Id = 1, UserId = userId, Amount = 100, Date = DateTime.Now.AddDays(-4), Category ="Test", Description ="Test", Pay = "Cash" },
-                    new Expense { Id = 2, UserId = userId, Amount = 200, Date = DateTime.Now.AddDays(-2),Category = "Test1", Description = "Test1", Pay = "Cash" },
+                    new Expense { Id = 1, UserId = userId, Amount = 100, Date = DateTime.Now.AddDays(-4), Category = "Test", Description = "Test", Pay = "Cash" },
+                    new Expense { Id = 2, UserId = userId, Amount = 200, Date = DateTime.Now.AddDays(-2), Category = "Test1", Description = "Test1", Pay = "Cash" },
                     new Expense { Id = 3, UserId = 2, Amount = 300, Date = DateTime.Now.AddDays(-1), Category = "Test2", Description = "Test2", Pay = "Cash" }
                 );
                 await context.SaveChangesAsync();
@@ -55,7 +55,7 @@ namespace FinancialManagementSystem.Tests.Repositories
 
             using (var context = new ApplicationDbContext(options))
             {
-                context.Expenses.Add(new Expense { Id = expenseId, UserId = 1, Amount = 100, Date = DateTime.Now, Category = "Test" , Description = "test"});
+                context.Expenses.Add(new Expense { Id = expenseId, UserId = 1, Amount = 100, Date = DateTime.Now, Category = "Test", Description = "test", Pay = "Cash" });
                 await context.SaveChangesAsync();
             }
 
@@ -129,7 +129,7 @@ namespace FinancialManagementSystem.Tests.Repositories
 
             using (var context = new ApplicationDbContext(options))
             {
-                context.Expenses.Add(new Expense { Id = expenseId, UserId = 1, Amount = 100, Description = "Old Expense", Date = DateTime.Now, Category = "Test" });
+                context.Expenses.Add(new Expense { Id = expenseId, UserId = 1, Amount = 100, Description = "Old Expense", Date = DateTime.Now, Category = "Test", Pay = "Cash" });
                 await context.SaveChangesAsync();
             }
 
@@ -162,7 +162,7 @@ namespace FinancialManagementSystem.Tests.Repositories
 
             using (var context = new ApplicationDbContext(options))
             {
-                context.Expenses.Add(new Expense { Id = expenseId, UserId = 1, Amount = 100, Description = "Expense to Delete", Date = DateTime.Now , Category = "Test"});
+                context.Expenses.Add(new Expense { Id = expenseId, UserId = 1, Amount = 100, Description = "Expense to Delete", Date = DateTime.Now, Category = "Test", Pay ="Cash" });
                 await context.SaveChangesAsync();
             }
 
@@ -191,9 +191,9 @@ namespace FinancialManagementSystem.Tests.Repositories
             using (var context = new ApplicationDbContext(options))
             {
                 context.Expenses.AddRange(
-                    new Expense { Id = 1, UserId = userId, Amount = 100, Date = DateTime.Now.AddDays(-1), Category = "Test", Description = "Test" },
-                    new Expense { Id = 2, UserId = userId, Amount = 200, Date = DateTime.Now.AddDays(-2), Category = "Test1", Description = "Test1" },
-                    new Expense { Id = 3, UserId = 2, Amount = 300, Date = DateTime.Now, Category = "Test2", Description = "Test2" } 
+                    new Expense { Id = 1, UserId = userId, Amount = 100, Date = DateTime.Now.AddDays(-1), Category = "Test", Description = "Test", Pay = "Cash" },
+                    new Expense { Id = 2, UserId = userId, Amount = 200, Date = DateTime.Now.AddDays(-2), Category = "Test1", Description = "Test1", Pay = "Cash" },
+                    new Expense { Id = 3, UserId = 2, Amount = 300, Date = DateTime.Now, Category = "Test2", Description = "Test2", Pay = "Cash" }
                 );
                 context.SaveChanges();
             }

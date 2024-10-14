@@ -3,10 +3,6 @@ using FinancialManagementSystem.Core.Entities;
 using FinancialManagementSystem.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace FinancialManagementSystem.Tests.Repositories
 {
@@ -57,7 +53,7 @@ namespace FinancialManagementSystem.Tests.Repositories
 
             using (var context = new ApplicationDbContext(options))
             {
-                context.Incomes.Add(new Income { Id = incomeId, UserId = 1, Amount = 1000, Date = DateTime.Now, Category = "Get", Description ="Test" });
+                context.Incomes.Add(new Income { Id = incomeId, UserId = 1, Amount = 1000, Date = DateTime.Now, Category = "Get", Description = "Test" });
                 await context.SaveChangesAsync();
             }
 
@@ -196,7 +192,7 @@ namespace FinancialManagementSystem.Tests.Repositories
             {
                 context.Incomes.AddRange(
                     new Income { Id = 1, UserId = userId, Amount = 1000, Date = DateTime.Now.AddDays(-25), Category = "Get", Description = "Test" },
-                new Income { Id = 2, UserId = userId, Amount = 2000, Date = DateTime.Now.AddDays(-10), Category = "Get  " , Description = "Test" },
+                new Income { Id = 2, UserId = userId, Amount = 2000, Date = DateTime.Now.AddDays(-10), Category = "Get  ", Description = "Test" },
                 new Income { Id = 3, UserId = userId, Amount = 3000, Date = DateTime.Now.AddDays(-5), Category = "Get", Description = "Test" }
                 );
                 await context.SaveChangesAsync();
@@ -224,7 +220,7 @@ namespace FinancialManagementSystem.Tests.Repositories
             {
                 context.Incomes.AddRange(
                     new Income { Id = 1, UserId = userId, Amount = 1000, Date = DateTime.Now.AddDays(-20), Category = "Get", Description = "Test" },
-                new Income { Id = 2, UserId = userId, Amount = 3000, Date = DateTime.Now.AddDays(-10), Category = "Get" , Description = "Test" },
+                new Income { Id = 2, UserId = userId, Amount = 3000, Date = DateTime.Now.AddDays(-10), Category = "Get", Description = "Test" },
                 new Income { Id = 3, UserId = userId, Amount = 2000, Date = DateTime.Now.AddDays(-5), Category = "Get", Description = "Test" }
                 );
                 context.SaveChanges();

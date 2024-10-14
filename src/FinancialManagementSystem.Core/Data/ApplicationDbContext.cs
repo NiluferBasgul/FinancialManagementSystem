@@ -12,15 +12,13 @@ namespace FinancialManagementSystem.Core.Data
         {
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseMySql(
-                "Server=mysql.railway.internal;Port=3306;Database=railway;User=root;Password=dDoOkkMytDinrgTTbfIkOyEQzqjfNOYy",
-                new MySqlServerVersion(new Version(9, 0, 0)) // Adjust MySQL version as necessary
-            );
-        }
-
-        // Remove the OnConfiguring method since the options are now passed via Dependency Injection
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+        //    optionsBuilder.UseMySql(
+        //        "Server=junction.proxy.rlwy.net;Port=47703;Database=railway;User=root;Password=dDoOkkMytDinrgTTbfIkOyEQzqjfNOYy",
+        //        new MySqlServerVersion(new Version(9, 0, 0)) // Adjust MySQL version as necessary
+        //    );
+        //}
 
         public DbSet<User> Users { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
@@ -36,7 +34,6 @@ namespace FinancialManagementSystem.Core.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // User entity configuration
             modelBuilder.Entity<User>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -46,34 +43,30 @@ namespace FinancialManagementSystem.Core.Data
                 entity.Property(e => e.Balance).HasPrecision(18, 2);
             });
 
-            // Budget entity configuration
             modelBuilder.Entity<Budget>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).UseIdentityColumn();
                 entity.Property(e => e.Amount).HasPrecision(18, 2);
                 entity.HasIndex(e => e.UserId);
-            });
 
-            modelBuilder.Entity<BudgetCategory>(entity =>
-            {
-                entity.HasOne(bc => bc.NeedsBudget)
-                    .WithMany(b => b.Needs)
-                    .HasForeignKey(bc => bc.NeedsBudgetId)
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .HasConstraintName("FK_BudgetCategory_NeedsBudget");
+                entity.HasMany(b => b.Needs)
+                      .WithOne(bc => bc.NeedsBudget)
+                      .HasForeignKey(bc => bc.NeedsBudgetId)
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired(false);
 
-                entity.HasOne(bc => bc.WantsBudget)
-                    .WithMany(b => b.Wants)
-                    .HasForeignKey(bc => bc.WantsBudgetId)
-                    .OnDelete(DeleteBehavior.Restrict)
-                    .HasConstraintName("FK_BudgetCategory_WantsBudget");
+                entity.HasMany(b => b.Wants)
+                      .WithOne(bc => bc.WantsBudget)
+                      .HasForeignKey(bc => bc.WantsBudgetId)
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired(false);
 
-                entity.HasOne(bc => bc.SavingsBudget)
-                    .WithMany(b => b.Savings)
-                    .HasForeignKey(bc => bc.SavingsBudgetId)
-                    .OnDelete(DeleteBehavior.Restrict)
-                    .HasConstraintName("FK_BudgetCategory_SavingsBudget");
+                entity.HasMany(b => b.Savings)
+                      .WithOne(bc => bc.SavingsBudget)
+                      .HasForeignKey(bc => bc.SavingsBudgetId)
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired(false); 
             });
 
             modelBuilder.Entity<Transaction>(entity =>
@@ -81,10 +74,8 @@ namespace FinancialManagementSystem.Core.Data
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).UseIdentityColumn();
                 entity.Property(e => e.Amount).HasPrecision(18, 2);
-                // Add any other configurations for Transaction entity
             });
 
-            // Income entity configuration
             modelBuilder.Entity<Income>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -94,7 +85,6 @@ namespace FinancialManagementSystem.Core.Data
                 entity.HasIndex(e => e.Date);
             });
 
-            // Reminder entity configuration
             modelBuilder.Entity<Reminder>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -103,7 +93,6 @@ namespace FinancialManagementSystem.Core.Data
                 entity.HasIndex(e => e.DueDate);
             });
 
-            // Goal entity configuration
             modelBuilder.Entity<Goal>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -113,7 +102,6 @@ namespace FinancialManagementSystem.Core.Data
                 entity.HasIndex(e => e.UserId);
             });
 
-            // Expense entity configuration
             modelBuilder.Entity<Expense>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -123,7 +111,6 @@ namespace FinancialManagementSystem.Core.Data
                 entity.HasIndex(e => e.Date);
             });
 
-            // Account entity configuration
             modelBuilder.Entity<Account>(entity =>
             {
                 entity.HasKey(e => e.Id);

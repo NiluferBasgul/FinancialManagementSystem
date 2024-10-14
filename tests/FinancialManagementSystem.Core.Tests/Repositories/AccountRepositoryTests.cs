@@ -11,7 +11,7 @@ namespace FinancialManagementSystem.Tests.Repositories
         private DbContextOptions<ApplicationDbContext> GetInMemoryDbContextOptions()
         {
             return new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()) // Unique DB name per test
                 .Options;
         }
 

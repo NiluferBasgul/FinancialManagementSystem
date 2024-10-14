@@ -2,6 +2,7 @@
 using FinancialManagementSystem.Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 
 namespace FinancialManagementSystem.API.Controllers
@@ -11,17 +12,22 @@ namespace FinancialManagementSystem.API.Controllers
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
+    [ExcludeFromDescription]
     public class BudgetController : ControllerBase
     {
         private readonly IBudgetService _budgetService;
         private readonly ILogger<BudgetController> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BudgetController"/> class.
+        /// </summary>
+        /// <param name="budgetService">Service for handling budget-related logic.</param>
+        /// <param name="logger">Logger for capturing log messages.</param>
         public BudgetController(IBudgetService budgetService, ILogger<BudgetController> logger)
         {
             _budgetService = budgetService;
             _logger = logger;
         }
-
         #region Helper Methods
 
         private int? GetAuthenticatedUserId()
@@ -122,28 +128,22 @@ namespace FinancialManagementSystem.API.Controllers
         [HttpPost("submitNeeds")]
         public async Task<IActionResult> SubmitNeeds([FromBody] List<BudgetCategoryModel> needs)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
+            if (needs == null && needs.IsNullOrEmpty())
+            {
+                needs = new List<BudgetCategoryModel>();
+            }
+
+            var userId = GetAuthenticatedUserId();
+            if (userId == null)
             {
                 return Unauthorized();
             }
 
-            var userId = int.Parse(userIdClaim.Value);
-
-            if (needs == null || !needs.Any())
-            {
-                return BadRequest("Needs data is required.");
-            }
-
-            // Calculate total spent on needs
-            decimal totalSpentOnNeeds = needs.Sum(n => n.Value);
-
-            // Update the needs for the user
-            var result = await _budgetService.UpdateNeedsAmount(userId, needs);
+            var result = await _budgetService.UpdateNeedsAmount(userId.Value, needs);
 
             if (result)
             {
-                return Ok(new { totalSpentOnNeeds });
+                return Ok();
             }
 
             return BadRequest("Failed to submit needs");

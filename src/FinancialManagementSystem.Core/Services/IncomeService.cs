@@ -1,12 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using FinancialManagementSystem.Core.Entities;
 using FinancialManagementSystem.Core.Interfaces;
 using FinancialManagementSystem.Core.Models;
-using FinancialManagementSystem.Core.Entities;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace FinancialManagementSystem.Core.Services
 {

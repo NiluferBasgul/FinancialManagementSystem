@@ -3,9 +3,6 @@ using FinancialManagementSystem.Core.Entities;
 using FinancialManagementSystem.Core.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FinancialManagementSystem.Tests.Repositories
 {

@@ -1,6 +1,6 @@
-﻿using FinancialManagementSystem.Core.Entities;
+﻿using FinancialManagementSystem.Core.Data;
+using FinancialManagementSystem.Core.Entities;
 using FinancialManagementSystem.Core.Interfaces;
-using FinancialManagementSystem.Core.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
